@@ -1,1 +1,5 @@
-node_modules
+# Ignore the node_modules folder (the slash means it is a folder)
+node_modules/
+
+# Ignore the .env file because it holds secret keys
+.env
