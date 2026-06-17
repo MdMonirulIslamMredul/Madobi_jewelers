@@ -6,3 +6,9 @@ vendor/
 
 # Ignore the .env file because it holds secret keys
 .env
+
+
+storage/framework/views/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/testing/*
