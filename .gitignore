@@ -1,5 +1,8 @@
 # Ignore the node_modules folder (the slash means it is a folder)
 node_modules/
 
+# Ignore Composer dependencies and generated vendor tooling
+vendor/
+
 # Ignore the .env file because it holds secret keys
 .env
