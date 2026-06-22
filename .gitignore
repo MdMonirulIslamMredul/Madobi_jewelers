@@ -7,6 +7,9 @@ vendor/
 # Ignore the .env file because it holds secret keys
 .env
 
+/vendor/* 
+/bootstrap/cache/*
+/vendor/composer/*
 
 storage/framework/views/*
 storage/framework/cache/*
