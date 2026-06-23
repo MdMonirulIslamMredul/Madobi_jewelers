@@ -40,7 +40,7 @@
                                 <option value="">_ _</option>
                                 @forelse ($users as $user)
                                 <option value="{{ $user->id }}" data-image="{{ asset('user/' . $user->image) }}">
-                                    {{ $user->name }} - {{ $user->phone }} ({{ $user->role->role_name }})
+                                    {{ $user->name }} {{ $user->last_name }}- {{ $user->phone }} ({{ $user->role->role_name }})
                                 </option>
                                 {{-- <option value="{{ $user->id }}">{{ $user->name }}-{{$user->phone}}</option> --}}
                                 @empty
@@ -121,7 +121,14 @@
                                         <div class="col-lg-3">
                                             <div class="form-group mb-3">
                                                 <label for="karat" class="form-label mb-2">ক্যারাট</label>
-                                                <input type="number" class="form-control" rows="5" name="karat[]" id="karat">
+                                                <select name="karat[]" class="form-select karat-select" onchange="if(this.value === 'Paeine') { this.nextElementSibling.style.display = 'block'; } else { this.nextElementSibling.style.display = 'none'; }">
+                                                    <option value="22K">22K</option>
+                                                    <option value="21K">21K</option>
+                                                    <option value="18K">18K</option>
+                                                    <option value="24K">24K</option>
+                                                    <option value="Paeine">Paeine</option>
+                                                </select>
+                                                <input type="text" name="karat_other[]" class="form-control mt-2" placeholder="অন্যান্য ক্যারাট লিখুন" style="display: none;">
                                             </div>
                                         </div>
                                         <div class="col-lg-3">
@@ -142,6 +149,24 @@
                                                 <input type="number" class="form-control price-input" readonly rows="5" name="price[]" id="price">
                                             </div>
                                         </div>
+
+                                        <div class="col-lg-6">
+                                            <label class="form-label" for="details">ডিটেইলস</label>
+                                            <div class="input-group">
+                                                <textarea name="details[]" class="form-control details-input" cols="150" rows="7" placeholder="ডিটেইলস লিখুন..."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <label class="form-label">{{ __('প্রোডাক্টের ছবি') }}</label>
+                                            <div class="d-block position-relative photo-wrapper">
+                                                <img class="photo-preview" src="{{ asset('cover/default-cover.jpg') }}" alt="your image" width="350" height="180" style="cursor: pointer; object-fit: cover; border-radius: 6px;">
+                                                <input type="file" name="photo[]" class="photo-input d-none" accept="image/*">
+                                                <div class="mt-2">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary photo-browse-btn">📷 ছবি নির্বাচন করুন</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
 
                                     </div>
                                 </div>
@@ -201,7 +226,7 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="card bg-secondary rounded col-lg-4">
+                        <!-- <div class="card bg-secondary rounded col-lg-4">
                             <label class="bg-secondary border-none mb-3" for="location">দোকান/গুদাম নির্বাচন করুন:</label>
                             <div class="m-5">
                                 <fieldset>
@@ -219,26 +244,14 @@
                                     </div>
                                 </fieldset>
                             </div>
-                        </div>
-                        <div class="mb-3 col-md-4">
-                            <label class="form-label" for="details">ডিটেইলস</label>
-                            <div class="input-group">
-                                <textarea name="details" class="form-control" id="details" cols="150" rows="7" placeholder="ডিটেইলস লিখুন..."></textarea>
-                            </div>
-                        </div>
-                        <div class="mb-3 col-md-4 text-center">
-                            <label for="photo" class="form-label">{{ __('প্রোডাক্টের ছবি') }}</label>
-                            <div class="d-block position-relative">
-                                <img id="previewIm" src="{{ asset('cover/default-cover.jpg' ) }}" alt="your image" width="350" height="180" onclick="document.getElementById('photoI').click();" style="cursor: pointer;">
-                                <input type="file" id="photoI" name="photo" class="d-none" onchange="preview(this)">
-                            </div>
-                        </div>
+                        </div> -->
+
                         <div class="col-lg-4">
                             <div class="form-group mb-3">
                                 <label for="order_date" class="form-label mb-2">অর্ডারের তারিখ</label>
                                 <input type="date" class="form-control @error('order_date')
                                     is-invalid
-                                @enderror" rows="5" name="order_date" value="{{ old('order_date') }}" id="order_date">
+                                @enderror" rows="5" name="order_date" value="{{ old('order_date', now()->format('Y-m-d')) }}" id="order_date">
                                 @error('order_date')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -246,7 +259,7 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="col-lg-4">
+                        <!-- <div class="col-lg-4">
                             <div class="form-group mb-3">
                                 <label for="receive_date" class="form-label mb-2">অর্ডার গ্রহণের তারিখ</label>
                                 <input type="date" class="form-control @error('receive_date')
@@ -258,7 +271,7 @@
                                 </span>
                                 @enderror
                             </div>
-                        </div>
+                        </div> -->
                         <div class="col-lg-4">
                             <div class="form-group mb-3">
                                 <label for="due_payment_date" class="form-label mb-2">বকেয়া পরিশোধের তারিখ</label>
@@ -414,21 +427,26 @@
     });
 </script>
 <script>
-    function preview(input) {
-        var preview = document.getElementById('previewIm');
-        var file = input.files[0];
-        var reader = new FileReader();
-
-        reader.onloadend = function() {
-            preview.src = reader.result;
-        }
-
+    // Per-card photo preview using event delegation
+    $(document).on('change', '.photo-input', function() {
+        var wrapper = $(this).closest('.photo-wrapper');
+        var previewImg = wrapper.find('.photo-preview')[0];
+        var file = this.files[0];
         if (file) {
+            var reader = new FileReader();
+            reader.onloadend = function() {
+                previewImg.src = reader.result;
+            };
             reader.readAsDataURL(file);
         } else {
-            preview.src = "{{ asset('cover/default-cover.jpg') }}";
+            previewImg.src = "{{ asset('cover/default-cover.jpg') }}";
         }
-    }
+    });
+
+    // Click preview image or browse button to open file picker
+    $(document).on('click', '.photo-preview, .photo-browse-btn', function() {
+        $(this).closest('.photo-wrapper').find('.photo-input').trigger('click');
+    });
 </script>
 <script>
     $(document).ready(function() {

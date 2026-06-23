@@ -80,7 +80,7 @@ class PurchaseController extends Controller
             'user_id' => $request->user_id,
             'category_id' => $request->category_id[0] ?? null,
             'product_id' => $request->product_id[0] ?? null,
-            'details' => $request->details,
+            'details' => $request->details[0] ?? null,
             'total_price' => $request->total_price,
             'adv_payment' => $request->adv_payment,
             'due_payment' => $request->due_payment,
@@ -94,7 +94,7 @@ class PurchaseController extends Controller
             'product_id' => $request->product_id[0] ?? null,
             'transaction_id' => $transaction->id,
             'invoice_no' => 'INV-' . rand(),
-            'details' => $request->details,
+            'details' => $request->details[0] ?? null,
             'total_price' => $request->total_price,
             'adv_payment' => $request->adv_payment,
             'due_payment' => $request->due_payment,
@@ -102,20 +102,14 @@ class PurchaseController extends Controller
             'total_payment' => $request->total_payment,
         ]);
 
-        // Handle photo upload
-        if ($request->photo) {
-            $imageName = 'purchase' . time() . '.' . $request->photo->extension();
-            $request->photo->move(public_path('user/purchase'), $imageName);
-        } else {
-            $imageName = 'default-cover.jpg'; // default image
-        }
-
         // Loop through each item and store the details
         $totalBhori = 0;
         $totalAna = 0;
         $totalRoti = 0;
         $totalPoint = 0;
         $totalGram = 0;
+
+        $photos = $request->file('photo') ?? [];
 
         for ($i = 0; $i < count($request->bhori); $i++) {
             $request_gold = [
@@ -130,9 +124,21 @@ class PurchaseController extends Controller
             $item_category_id = $request->category_id[$i] ?? null;
             $item_product_id = $request->product_id[$i] ?? null;
             $item_karat = $request->karat[$i] ?? null;
+            if ($item_karat === 'Paeine') {
+                $item_karat = $request->karat_other[$i] ?? null;
+            }
             $item_unit_price = $request->unit_price[$i] ?? null;
             $item_gram = $request->gram[$i] ?? 0;
             $item_total_price = $request->price[$i] ?? 0;
+            $item_details = $request->details[$i] ?? null;
+
+            // Handle per-item photo upload
+            if (!empty($photos[$i])) {
+                $imageName = 'purchase' . time() . $i . '.' . $photos[$i]->extension();
+                $photos[$i]->move(public_path('user/purchase'), $imageName);
+            } else {
+                $imageName = 'default-cover.jpg';
+            }
 
             $pur = Purchase::create([
                 'user_id' => $request->user_id,
@@ -148,12 +154,12 @@ class PurchaseController extends Controller
                 'roti' => $total['roti'],
                 'point' => $total['point'],
                 'gram' => $item_gram,
-                'details' => $request->details,
+                'details' => $item_details,
                 'total_price' => $item_total_price,
                 'order_date' => $request->order_date,
                 'due_payment_date' => $request->due_payment_date,
                 'receive_date' => $request->receive_date,
-                'location' => $request->location,
+                'location' => 'is_hold',
                 'photo' => $imageName,
             ]);
 
@@ -441,7 +447,7 @@ class PurchaseController extends Controller
             'user_id' => $request->user_id,
             'category_id' => $request->category_id[0] ?? null,
             'product_id' => $request->product_id[0] ?? null,
-            'details' => $request->details,
+            'details' => $request->details[0] ?? null,
             'total_price' => $request->total_price,
             'adv_payment' => $request->adv_payment,
             'due_payment' => $request->due_payment,
@@ -453,21 +459,16 @@ class PurchaseController extends Controller
             'user_id' => $request->user_id,
             'category_id' => $request->category_id[0] ?? null,
             'product_id' => $request->product_id[0] ?? null,
-            'details' => $request->details,
+            'details' => $request->details[0] ?? null,
             'total_price' => $request->total_price,
             'adv_payment' => $request->adv_payment,
             'due_payment' => $request->due_payment,
             'due_payment_date' => $request->due_payment_date,
             'total_payment' => $request->total_payment,
         ]);
-
-        // Handle photo upload
-        if ($request->photo) {
-            $imageName = 'purchase' . time() . '.' . $request->photo->extension();
-            $request->photo->move(public_path('user/purchase'), $imageName);
-        } else {
-            $imageName = 'default-cover.jpg'; // default image
-        }
+        $old_purchase = Purchase::where('transaction_id', $transaction->id)->first();
+        $location = $request->has('location') ? $request->location : ($old_purchase ? $old_purchase->location : 'is_hold');
+        
         Purchase::where('transaction_id', $transaction->id)->delete();
         // Loop through each item and store the details
         $totalBhori = 0;
@@ -475,6 +476,8 @@ class PurchaseController extends Controller
         $totalRoti = 0;
         $totalPoint = 0;
         $totalGram = 0;
+
+        $photos = $request->file('photo') ?? [];
 
         for ($i = 0; $i < count($request->bhori); $i++) {
             $request_gold = [
@@ -489,9 +492,21 @@ class PurchaseController extends Controller
             $item_category_id = $request->category_id[$i] ?? null;
             $item_product_id = $request->product_id[$i] ?? null;
             $item_karat = $request->karat[$i] ?? null;
+            if ($item_karat === 'Paeine') {
+                $item_karat = $request->karat_other[$i] ?? null;
+            }
             $item_unit_price = $request->unit_price[$i] ?? null;
             $item_gram = $request->gram[$i] ?? 0;
             $item_total_price = $request->price[$i] ?? 0;
+            $item_details = $request->details[$i] ?? null;
+
+            // Handle per-item photo upload
+            if (!empty($photos[$i])) {
+                $imageName = 'purchase' . time() . $i . '.' . $photos[$i]->extension();
+                $photos[$i]->move(public_path('user/purchase'), $imageName);
+            } else {
+                $imageName = 'default-cover.jpg';
+            }
 
             $pur = Purchase::create([
                 'user_id' => $request->user_id,
@@ -507,12 +522,12 @@ class PurchaseController extends Controller
                 'roti' => $total['roti'],
                 'point' => $total['point'],
                 'gram' => $item_gram,
-                'details' => $request->details,
+                'details' => $item_details,
                 'total_price' => $item_total_price,
                 'order_date' => $request->order_date,
                 'due_payment_date' => $request->due_payment_date,
                 'receive_date' => $request->receive_date,
-                'location' => $request->location,
+                'location' => $location,
                 'photo' => $imageName,
             ]);
 
@@ -554,7 +569,7 @@ class PurchaseController extends Controller
                     'gram' => $updateGram,
                     'qty' => $updateQty,
                     'unit_price' => $item_unit_price,
-                    'location' => $request->location,
+                    'location' => $location,
                 ]);
 
                 $stock_id = $prev_stock->id;
@@ -570,7 +585,7 @@ class PurchaseController extends Controller
                     'gram' => $item_gram,
                     'qty' => 1,
                     'unit_price' => $item_unit_price,
-                    'location' => $request->location,
+                    'location' => $location,
                 ]);
 
                 $stock_id = $stock->id;
@@ -584,7 +599,7 @@ class PurchaseController extends Controller
             ];
 
             // Handle shop and warehouse updates for this specific product/category
-            if ($request->location == "is_shop") {
+            if ($location == "is_shop") {
                 $prev_shop_stock = Shop::where('product_id', $item_product_id)
                     ->where('category_id', $item_category_id)
                     ->latest()
@@ -624,7 +639,7 @@ class PurchaseController extends Controller
                         'gram' => $item_gram,
                     ]);
                 }
-            } elseif ($request->location == "is_warehouse") {
+            } elseif ($location == "is_warehouse") {
                 $prev_ware_stock = Warehouse::where('product_id', $item_product_id)
                     ->where('category_id', $item_category_id)
                     ->latest()

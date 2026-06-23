@@ -2,88 +2,84 @@
 <script src="{{ asset('admin/assets/node_modules/toastr/build/toastr.min.js') }}"></script>
 
 <script>
-    $('.show_confirm').click(function(event){
-            let form = $(this).closest('form');
+    $('.show_confirm').click(function(event) {
+        let form = $(this).closest('form');
 
-            event.preventDefault();
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                    Swal.fire(
+        event.preventDefault();
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+                Swal.fire(
                     'Deleted!',
                     'Your file has been deleted.',
                     'success'
-                    )
-                }
-                })
+                )
+            }
         })
+    })
 </script>
 <script>
-    $('.show_update').click(function(event){
-            let form = $(this).closest('form');
-            event.preventDefault();
-            Swal.fire({
-            title: "Do you want to save the changes?",
+    $('.show_update').click(function(event) {
+        let form = $(this).closest('form');
+        event.preventDefault();
+        Swal.fire({
+            title: "আপনি কি পরিবর্তন সেভ করতে চান?"
             showDenyButton: true,
             showCancelButton: true,
-            confirmButtonText: "Save",
-            denyButtonText: `Don't save`
-            }).then((result) => {
+            confirmButtonText: "হাঁ",
+            denyButtonText: "না"
+        }).then((result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isConfirmed) {
                 form.submit();
-                Swal.fire("Saved!", "", "success");
+                Swal.fire("সেভ হয়েছে", "", "success");
             } else if (result.isDenied) {
-                Swal.fire("Changes are not saved", "", "info");
+                Swal.fire("সেভ হয়নি", "", "info");
             }
-            });
-        })
+        });
+    })
 </script>
 <script>
     @if(Session::has('message'))
-    toastr.options =
-    {
-        "closeButton" : true,
-        "progressBar" : true,
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
     }
-            toastr.success("{{ session('message') }}");
+    toastr.success("{{ session('message') }}");
     @endif
 
     @if(Session::has('error'))
-    toastr.options =
-    {
-        "closeButton" : true,
-        "progressBar" : true
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true
     }
-            toastr.error("{{ session('error') }}");
+    toastr.error("{{ session('error') }}");
     @endif
 
     @if(Session::has('info'))
-    toastr.options =
-    {
-        "closeButton" : true,
-        "progressBar" : true
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true
     }
-            toastr.info("{{ session('info') }}");
+    toastr.info("{{ session('info') }}");
     @endif
 
     @if(Session::has('warning'))
-    toastr.options =
-    {
-        "closeButton" : true,
-        "progressBar" : true
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true
     }
-            toastr.warning("{{ session('warning') }}");
+    toastr.warning("{{ session('warning') }}");
     @endif
-  </script>
+</script>
 
 <script>
     $(document).ready(function() {
@@ -115,7 +111,7 @@
             var point = $('#point').val() || 0;
 
             $.ajax({
-                url: '{{ route('convert.to.gram') }}',
+                url: "{{ route('convert.to.gram') }}",
                 method: 'POST',
                 data: {
                     vori: vori,
@@ -141,7 +137,7 @@
             var point = $('#added_point').val() || 0;
 
             $.ajax({
-                url: '{{ route('convert.to.gram') }}',
+                url: "{{ route('convert.to.gram') }}",
                 method: 'POST',
                 data: {
                     vori: vori,
@@ -180,39 +176,41 @@
         $('#form_sub').on('click', function(event) {
             event.preventDefault();
 
-            if ($('input[name="location"]').length) {
-                const locationRadios = document.getElementsByName('location');
-                let locationSelected = false;
-                for (const radio of locationRadios) {
-                    if (radio.checked) {
-                        locationSelected = true;
-                        break;
-                    }
-                }
+            //  if ($('input[name="location"]').length) {
+            //     const locationRadios = document.getElementsByName('location');
+            //     let locationSelected = false;
+            //     for (const radio of locationRadios) {
+            //         if (radio.checked) {
+            //             locationSelected = true;
+            //             break;
+            //         }
+            //     }
 
-                if (!locationSelected) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: "Please select (দোকান or গুদাম).",
-                    });
-                    return; // Stop form submission
-                }
-            }
+            //     if (!locationSelected) {
+            //         Swal.fire({
+            //             icon: "error",
+            //             title: "দুঃখিত!",
+            //             text: "দোকান অথবা গুদাম নির্বাচন করুন।",
+            //         });
+            //         return; // Stop form submission
+            //     }
+            // }
+
+
             if ($('#category_id').length) { // Check if the select element exists
                 if (!$('#category_id').val()) {
                     Swal.fire({
                         icon: "error",
-                        title: "Oops...",
-                        text: "Please select a Category.",
+                        title: "দুঃখিত!",
+                        text: "ক্যাটেগরি নির্বাচন করুন।",
                     });
                     return;
                 }
                 if (!$('#product_id').val()) {
                     Swal.fire({
                         icon: "error",
-                        title: "Oops...",
-                        text: "Please select a Product.",
+                        title: "দুঃখিত!",
+                        text: "প্রোডাক্ট নির্বাচন করুন।",
                     });
                     return;
                 }
@@ -226,8 +224,8 @@
                 if (!allCategoriesSelected) {
                     Swal.fire({
                         icon: "error",
-                        title: "Oops...",
-                        text: "Please select a Category for all items.",
+                        title: "দুঃখিত!",
+                        text: "ক্যাটেগরি নির্বাচন করুন।",
                     });
                     return;
                 }
@@ -241,8 +239,8 @@
                 if (!allProductsSelected) {
                     Swal.fire({
                         icon: "error",
-                        title: "Oops...",
-                        text: "Please select a Product for all items.",
+                        title: "দুঃখিত!",
+                        text: "প্রোডাক্ট নির্বাচন করুন।",
                     });
                     return;
                 }
@@ -253,13 +251,13 @@
                 if (!oldCustomerSelected) {
                     Swal.fire({
                         icon: "error",
-                        title: "Oops...",
-                        text: "Please select a User.",
+                        title: "দুঃখিত!",
+                        text: "সাপ্লায়ার নির্বাচন করুন।",
                     });
                     return; // Stop form submission
                 }
             }
-            
+
 
             // Collect data from user_form
             let userFormData = '';
@@ -273,10 +271,46 @@
             }
 
             // Collect data from form2
+            const fieldLabels = {
+                'transaction_id': 'ট্রান্সেকশন আইডি',
+                'user_id': 'সাপ্লায়ার আইডি',
+                'user_name': 'ইউজার নাম',
+                'qtr': 'কোয়ান্টিটি',
+                'category_id[]': 'ক্যাটেগরি',
+                'product_id[]': 'প্রোডাক্ট',
+                'bhori[]': 'ভরি',
+                'ana[]': 'আনা',
+                'roti[]': 'রতি',
+                'point[]': 'পয়েন্ট',
+                'karat[]': 'ক্যারট',
+                'karat_other[]': 'পাইন বিস্তারিত ',
+                'unit_price[]': 'ইউনিট প্রাইস',
+
+                'price[]': 'দাম',
+                'total[]': 'টোটাল',
+                'gram[]': 'গ্রাম',
+                'note': 'নোট',
+                'date': 'তারিখ',
+                'total_price': 'মোট দাম',
+                'adv_payment': 'অগ্রিম পেমেন্ট',
+                'due_payment': 'বকেয়া পেমেন্ট',
+                'total_payment': 'মোট পেমেন্ট',
+                'order_date': 'অর্ডার তারিখ',
+                'receive_date': 'রিসিভ তারিখ',
+                'due_payment_date': 'বকেয়া পেমেন্ট তারিখ',
+
+                'location': 'লোকেশন',
+                'detail': 'বিস্তারিত',
+                'photo': 'ছবি',
+                'details[]': 'বিস্তারিত',
+                'photo[]': 'ছবি',
+
+            };
+
             let form2Data = '';
             $('#form2').find('input, select, textarea').each(function() {
-                if ($(this).attr('name') === '_token') {
-                    return; // Skip the token field
+                if ($(this).attr('name') === '_token' || $(this).attr('name') === '_method') {
+                    return; // Skip the token and method fields
                 }
 
                 if ($(this).is('input[type="radio"]') && !$(this).is(':checked')) {
@@ -288,21 +322,24 @@
                     return;
                 }
 
+                const rawName = $(this).attr('name');
+                const label = fieldLabels[rawName] || rawName;
+
                 if ($(this).is('select')) {
-                    form2Data += `<p><strong>${$(this).attr('name')}:</strong> ${$(this).find('option:selected').text()}</p>`;
+                    form2Data += `<p><strong>${label}:</strong> ${$(this).find('option:selected').text()}</p>`;
                 } else {
-                    form2Data += `<p><strong>${$(this).attr('name')}:</strong> ${$(this).val()}</p>`;
+                    form2Data += `<p><strong>${label}:</strong> ${$(this).val()}</p>`;
                 }
             });
 
             // Show confirmation popup with combined data
             Swal.fire({
-                title: "Confirm Your Input",
+                title: "আপনার ইনপুট নিশ্চিত করুন",
                 html: `<div>${userFormData}</div><div>${form2Data}</div>`,
                 icon: "question",
                 showCancelButton: true,
-                confirmButtonText: "Yes, submit it!",
-                cancelButtonText: "No, cancel!"
+                confirmButtonText: "হ্যাঁ, জমা দিন!",
+                cancelButtonText: "না, বাতিল করুন!"
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Check if new customer is selected
@@ -362,7 +399,7 @@
                             }
                         });
                     } else {
-                        
+
                         // If old customer is selected, just submit form2
                         $('#form2').submit();
                     }
@@ -374,41 +411,41 @@
 
 <script>
     // For Create
-        // To Get Product Data
-        const getProducts = (category_id, selected = null) => {
-            if(window.location.href.includes('/admin/sells')){
-                    // console.log(window.location.href);
-                    axios.get(`${window.location.origin}/get-products-shop/${category_id}`).then(res => {
-                        let products = res.data
-                        let element = $('#product_id')
-                        element.removeAttr('disabled')
-                        element.empty()
-                        element.append(`<option>এখানে নির্বাচন করুন</option>`)
-                        products.map((product, index) => {
-                            // console.log(product)
-                            element.append(
-                                `<option value="${product.id}" ${selected == product.id ?'selected' : ''}>${product.product_name}</option>`
-                            )
-                        })
-                    })
-                }else{
-                    axios.get(`${window.location.origin}/get-products/${category_id}`).then(res => {
-                        let products = res.data
-                        let element = $('#product_id')
-                        element.removeAttr('disabled')
-                        element.empty()
-                        element.append(`<option>এখানে নির্বাচন করুন</option>`)
-                        products.map((product, index) => {
-                            // console.log(product)
-                            element.append(
-                                `<option value="${product.id}" ${selected == product.id ?'selected' : ''}>${product.product_name}</option>`
-                            )
-                        })
-                    })
-                }
+    // To Get Product Data
+    const getProducts = (category_id, selected = null) => {
+        if (window.location.href.includes('/admin/sells')) {
+            // console.log(window.location.href);
+            axios.get(`${window.location.origin}/get-products-shop/${category_id}`).then(res => {
+                let products = res.data
+                let element = $('#product_id')
+                element.removeAttr('disabled')
+                element.empty()
+                element.append(`<option>এখানে নির্বাচন করুন</option>`)
+                products.map((product, index) => {
+                    // console.log(product)
+                    element.append(
+                        `<option value="${product.id}" ${selected == product.id ?'selected' : ''}>${product.product_name}</option>`
+                    )
+                })
+            })
+        } else {
+            axios.get(`${window.location.origin}/get-products/${category_id}`).then(res => {
+                let products = res.data
+                let element = $('#product_id')
+                element.removeAttr('disabled')
+                element.empty()
+                element.append(`<option>এখানে নির্বাচন করুন</option>`)
+                products.map((product, index) => {
+                    // console.log(product)
+                    element.append(
+                        `<option value="${product.id}" ${selected == product.id ?'selected' : ''}>${product.product_name}</option>`
+                    )
+                })
+            })
         }
- 
-        $('#category_id').on('change', function() {
-            getProducts($(this).val())
-        })
+    }
+
+    $('#category_id').on('change', function() {
+        getProducts($(this).val())
+    })
 </script>
