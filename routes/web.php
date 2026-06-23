@@ -25,6 +25,8 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RepairController;
 use App\Http\Controllers\Admin\GoldController;
 use App\Http\Controllers\Trash\PermissionTrashController;
+use App\Http\Controllers\Admin\ProductPriceController;
+
 
 
 Auth::routes();
@@ -44,52 +46,52 @@ Route::get('get-products-shop/{category_id}', [PurchaseController::class, 'getPr
 Route::post('/calculate', [PurchaseController::class, 'calculate'])->name('calculate');
 Route::post('/calculate-total', [PurchaseController::class, 'calculateTotal'])->name('calculate.total');
 
-Route::prefix('')->group(function(){
+Route::prefix('')->group(function () {
 
     Route::get('/', [AdminLoginController::class, 'loginPage'])->name('admin.loginpage');
     Route::post('/', [AdminLoginController::class, 'login'])->name('admin.login');
 });
 
-Route::prefix('admin')->middleware('auth', 'is_admin')->group(function(){
+Route::prefix('admin')->middleware('auth', 'is_admin')->group(function () {
     Route::get('/dashboard', [HomeController::class, 'adminDashboard'])->name('admin.dashboard');
     Route::post('/logout', [AdminLoginController::class, 'adminLogout'])->name('admin.logout');
 
     //module start
     Route::get('module/trash', [ModuleTrashController::class, 'trash'])
-    ->name('module.trash');
+        ->name('module.trash');
     Route::get('module/{module_slug}/restore', [ModuleTrashController::class, 'restore'])
-    ->name('module.restore');
+        ->name('module.restore');
     Route::delete('module/{module_slug}/forcedelete', [ModuleTrashController::class, 'forceDelete'])
-    ->name('module.forcedelete');
+        ->name('module.forcedelete');
     Route::resource('module', ModuleController::class);
     //module end
 
     //permission start
     Route::get('permission/trash', [PermissionTrashController::class, 'trash'])
-    ->name('permission.trash');
+        ->name('permission.trash');
     Route::get('permission/{permission_slug}/restore', [PermissionTrashController::class, 'restore'])
-    ->name('permission.restore');
+        ->name('permission.restore');
     Route::delete('permission/{permission_slug}/forcedelete', [PermissionTrashController::class, 'forceDelete'])
-    ->name('permission.forcedelete');
+        ->name('permission.forcedelete');
     Route::resource('permission', PermissionController::class);
     //permission end
 
     //role start
     Route::get('role/trash', [RoleTrashController::class, 'trash'])
-    ->name('role.trash');
+        ->name('role.trash');
     Route::get('role/{role_slug}/restore', [RoleTrashController::class, 'restore'])
-    ->name('role.restore');
+        ->name('role.restore');
     Route::delete('role/{role_slug}/forcedelete', [RoleTrashController::class, 'forceDelete'])
-    ->name('role.forcedelete');
+        ->name('role.forcedelete');
     Route::resource('role', RoleController::class);
     //role end
 
     //User Start
     Route::get('/users/trash', [UserTrashController::class, 'trash'])->name('users.trash');
     Route::get('/users/restore/{id}', [UserTrashController::class, 'restore'])
-    ->name('users.restore');
+        ->name('users.restore');
     Route::delete('/users/forcedelete/{id}', [UserTrashController::class, 'forceDelete'])
-    ->name('users.forcedelete');
+        ->name('users.forcedelete');
     // //Ajax Call For User Active
     // Route::get('check/user/is_active/{user_id}', [UserController::class, 'checkActive'])
     // ->name('user.is_active.ajax');
@@ -134,7 +136,11 @@ Route::prefix('admin')->middleware('auth', 'is_admin')->group(function(){
 
     //product start
     Route::resource('product', ProductController::class);
-    //product end
+    //product endv
+
+    //product price start
+    Route::resource('product-price', ProductPriceController::class);
+    //product price end
 
     //purchase start
     Route::resource('purchase', PurchaseController::class);
@@ -183,9 +189,10 @@ Route::prefix('admin')->middleware('auth', 'is_admin')->group(function(){
     Route::get('/stocks', [StockController::class, 'stock_index'])->name('stock.index');
     Route::get('/shop/stocks', [StockController::class, 'shop_stock_index'])->name('shop.stock');
     Route::get('/warehouse/stocks', [StockController::class, 'warehouse_stock_index'])->name('warehouse.stock');
+    Route::get('/hold/stocks', [StockController::class, 'hold_stock_index'])->name('hold.stock');
     Route::post('/stock/delete', [StockController::class, 'stock_delete'])->name('stock.delete');
 
-    
+
     // Karigor Product
     Route::get('/karigor/stock', [KarigorController::class, 'karigor_stock'])->name('karigor.stock');
     Route::post('/karigor/stock/store', [KarigorController::class, 'karigor_stock_store'])->name('karigor.stock.store');
@@ -223,7 +230,4 @@ Route::prefix('admin')->middleware('auth', 'is_admin')->group(function(){
 
     // get karigor stock
     Route::post('/karigor/stock', [GoldController::class, 'karigor_stock'])->name('karigor.stock');
-
-
-
 });

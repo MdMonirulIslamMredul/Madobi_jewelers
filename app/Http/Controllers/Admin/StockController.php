@@ -34,6 +34,12 @@ class StockController extends Controller
     return view('admin.stock.warehouseStock',compact('warehouses'));
    }
 
+   public function hold_stock_index()
+   {
+       $purchases = \App\Models\Purchase::where('location', 'is_hold')->latest()->get();
+       return view('admin.stock.stock', compact('purchases'));
+   }
+
    public function stock_create()
    {
     $categories=ProductCategory::get();
