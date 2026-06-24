@@ -57,8 +57,10 @@ class UserController extends Controller
         $user = User::create([
             'role_id' => $request->role_id,
             'name' => $request->name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'phone2' => $request->phone2,
             'image' => $profile,
             'password' => Hash::make($request->password)
         ]);
@@ -97,8 +99,10 @@ class UserController extends Controller
             $user = new User;
             $user->role_id = $request->role_id;
             $user->name = $request->name;
+            $user->last_name = $request->last_name;
             $user->address = $request->address;
             $user->phone = $request->phone;
+            $user->phone2 = $request->phone2;
             $user->image = $profile;
             $user->photo1 = $imageName1;
             $user->save();
@@ -156,8 +160,10 @@ class UserController extends Controller
         $user->update([
             'role_id' => $request->role_id,
             'name' => $request->name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'phone2' => $request->phone2,
             'password' => Hash::make($request->password),
             'is_active' => $request->filled('is_active'),
         ]);
