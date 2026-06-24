@@ -117,9 +117,20 @@
                                             </div>
                                         </div>
                                         <div class="col-lg-3">
+                                            @php
+                                                $karatStdOptions = ['18K','21K','22K','24K'];
+                                                $karatValue = old('karat.' . $index, $purchase->karat ?? '');
+                                                $karatIsCustom = !in_array($karatValue, $karatStdOptions);
+                                            @endphp
                                             <div class="form-group mb-3">
                                                 <label for="karat" class="form-label mb-2">ক্যারাট</label>
-                                                <input type="number" class="form-control" rows="5" name="karat[]" value="{{ old('karat.' . $index, $purchase->karat) }}">
+                                                <select name="karat[]" class="form-select karat-select" onchange="if(this.value === 'Paeine') { this.nextElementSibling.style.display = 'block'; } else { this.nextElementSibling.style.display = 'none'; }">
+                                                    @foreach($karatStdOptions as $kOpt)
+                                                        <option value="{{ $kOpt }}" {{ $karatValue == $kOpt ? 'selected' : '' }}>{{ $kOpt }}</option>
+                                                    @endforeach
+                                                    <option value="Paeine" {{ $karatIsCustom ? 'selected' : '' }}>Paeine</option>
+                                                </select>
+                                                <input type="text" name="karat_other[]" class="form-control mt-2" placeholder="অন্যান্য ক্যারাট লিখুন" value="{{ $karatIsCustom ? $karatValue : '' }}" style="{{ $karatIsCustom ? '' : 'display: none;' }}">
                                             </div>
                                         </div>
                                         <div class="col-lg-3">
@@ -197,9 +208,20 @@
                                             </div>
                                         </div>
                                         <div class="col-lg-3">
+@php
+    $karatOptions = ['18K','21K','22K','24K'];
+    $selectedKarat = old('karat.' . $index, $purchase->karat ?? '');
+    $isCustom = !in_array($selectedKarat, $karatOptions);
+@endphp
                                             <div class="form-group mb-3">
                                                 <label for="karat" class="form-label mb-2">ক্যারাট</label>
-                                                <input type="number" class="form-control" rows="5" name="karat[]" id="karat">
+                                                <select name="karat[]" class="form-select karat-select" onchange="if(this.value === 'Paeine') { this.nextElementSibling.style.display = 'block'; } else { this.nextElementSibling.style.display = 'none'; }">
+                                                    @foreach($karatOptions as $opt)
+                                                        <option value="{{ $opt }}" {{ $selectedKarat == $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                                                    @endforeach
+                                                    <option value="Paeine" {{ $isCustom ? 'selected' : '' }}>Paeine</option>
+                                                </select>
+                                                <input type="text" name="karat_other[]" class="form-control mt-2" placeholder="অন্যান্য ক্যারাট লিখুন" value="{{ $isCustom ? $selectedKarat : '' }}" style="{{ $isCustom ? '' : 'display: none;' }}">
                                             </div>
                                         </div>
                                         <div class="col-lg-3">
@@ -285,15 +307,11 @@
                                     <div>
                                         <div class="row text-center">
                                             <div class="col-6">
-                                                <input type="radio" id="is_shop" name="location" value="is_shop" @if ($transaction->purchases[0]->location == 'is_shop')
-                                                checked  
-                                                @endif/>
+                                                <input type="radio" id="is_shop" name="location" value="is_shop" />
                                                 <label class="form-control" for="is_shop">দোকান</label>
                                             </div>
                                             <div class="col-6">
-                                                <input type="radio" id="is_warehouse" name="location" value="is_warehouse" @if ($transaction->purchases[0]->location == 'is_warehouse')
-                                                checked  
-                                                @endif/>
+                                                <input type="radio" id="is_warehouse" name="location" value="is_warehouse" />
                                                 <label class="form-control" for="is_warehouse">গুদাম</label>
                                             </div>
                                         </div>
