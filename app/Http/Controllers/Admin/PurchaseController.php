@@ -131,6 +131,8 @@ class PurchaseController extends Controller
             $item_gram = $request->gram[$i] ?? 0;
             $item_total_price = $request->price[$i] ?? 0;
             $item_details = $request->details[$i] ?? null;
+            $item_one_gram_price = $request->one_gram_price[$i] ?? null;
+            $item_actual_price = $request->actual_price[$i] ?? null;
 
             // Handle per-item photo upload
             if (!empty($photos[$i])) {
@@ -154,6 +156,9 @@ class PurchaseController extends Controller
                 'roti' => $total['roti'],
                 'point' => $total['point'],
                 'gram' => $item_gram,
+                'raw_gold' => $request->raw_gold[$i] ?? null,
+                'one_gram_price' => $item_one_gram_price,
+                'actual_price' => $item_actual_price,
                 'details' => $item_details,
                 'total_price' => $item_total_price,
                 'order_date' => $request->order_date,
@@ -412,7 +417,8 @@ class PurchaseController extends Controller
      */
     public function show($id)
     {
-        //
+        $transaction = Transaction::with(['purchases.product', 'purchases.productCategory', 'user'])->findOrFail($id);
+        return view('admin.purchase.show', compact('transaction'));
     }
 
     /**
@@ -499,6 +505,8 @@ class PurchaseController extends Controller
             $item_gram = $request->gram[$i] ?? 0;
             $item_total_price = $request->price[$i] ?? 0;
             $item_details = $request->details[$i] ?? null;
+            $item_one_gram_price = $request->one_gram_price[$i] ?? null;
+            $item_actual_price = $request->actual_price[$i] ?? null;
 
             // Handle per-item photo upload
             if (!empty($photos[$i])) {
@@ -522,6 +530,9 @@ class PurchaseController extends Controller
                 'roti' => $total['roti'],
                 'point' => $total['point'],
                 'gram' => $item_gram,
+                'raw_gold' => $request->raw_gold[$i] ?? null,
+                'one_gram_price' => $item_one_gram_price,
+                'actual_price' => $item_actual_price,
                 'details' => $item_details,
                 'total_price' => $item_total_price,
                 'order_date' => $request->order_date,
