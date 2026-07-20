@@ -121,14 +121,13 @@
                                         <div class="col-lg-3">
                                             <div class="form-group mb-3">
                                                 <label for="karat" class="form-label mb-2">ক্যারাট</label>
-                                                <select name="karat[]" class="form-select karat-select" onchange="if(this.value === 'Paeine') { this.nextElementSibling.style.display = 'block'; } else { this.nextElementSibling.style.display = 'none'; }">
+                                                <select name="karat[]" class="form-select karat-select">
                                                     <option value="22K">22K</option>
                                                     <option value="21K">21K</option>
                                                     <option value="18K">18K</option>
                                                     <option value="24K">24K</option>
                                                     <option value="Paeine">Paeine</option>
                                                 </select>
-                                                <input type="text" name="karat_other[]" class="form-control mt-2" placeholder="অন্যান্য ক্যারাট লিখুন" style="display: none;">
                                             </div>
                                         </div>
                                         <div class="col-lg-3">
@@ -137,32 +136,60 @@
                                                 <input type="number" class="form-control unit_price_input" rows="5" name="unit_price[]" id="unit_price">
                                             </div>
                                         </div>
+
+                                        <div class="col-lg-3">
+                                            <div class="form-group mb-3">
+                                                <label for="one_gram_price" class="form-label mb-2">এক গ্রামের মূল্য</label>
+                                                <input type="number" step="any" class="form-control one_gram_price_input" rows="5" min="1" name="one_gram_price[]" readonly id="one_gram_price">
+                                            </div>
+                                        </div>
+
                                         <div class="col-lg-3">
                                             <div class="form-group mb-3">
                                                 <label for="gram" class="form-label mb-2">গ্রাম হিসাব</label>
                                                 <input type="number" class="form-control" rows="5" min="1" name="gram[]" readonly id="gram">
                                             </div>
                                         </div>
+
+
                                         <div class="col-lg-3">
                                             <div class="form-group mb-3">
-                                                <label for="price" class="form-label mb-2">মূল্য</label>
+                                                <label for="raw_gold" class="form-label mb-2">পাকা সোনা (গ্রাম)</label>
+                                                <input type="number" step="any" class="form-control raw-gold-input" rows="5" name="raw_gold[]" id="raw_gold">
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-lg-3">
+                                            <div class="form-group mb-3">
+                                                <label for="price" class="form-label mb-2">ক্রয় মূল্য</label>
                                                 <input type="number" class="form-control price-input" readonly rows="5" name="price[]" id="price">
                                             </div>
                                         </div>
 
-                                        <div class="col-lg-6">
-                                            <label class="form-label" for="details">ডিটেইলস</label>
-                                            <div class="input-group">
-                                                <textarea name="details[]" class="form-control details-input" cols="150" rows="7" placeholder="ডিটেইলস লিখুন..."></textarea>
+                                        <div class="col-lg-3">
+                                            <div class="form-group mb-3">
+                                                <label for="actual_price" class="form-label mb-2">আসল মূল্য</label>
+                                                <input type="number" step="any" class="form-control actual-price-input" rows="5" name="actual_price[]" id="actual_price">
                                             </div>
                                         </div>
+
+
                                         <div class="col-lg-6">
-                                            <label class="form-label">{{ __('প্রোডাক্টের ছবি') }}</label>
-                                            <div class="d-block position-relative photo-wrapper">
-                                                <img class="photo-preview" src="{{ asset('cover/default-cover.jpg') }}" alt="your image" width="350" height="180" style="cursor: pointer; object-fit: cover; border-radius: 6px;">
-                                                <input type="file" name="photo[]" class="photo-input d-none" accept="image/*">
-                                                <div class="mt-2">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary photo-browse-btn">📷 ছবি নির্বাচন করুন</button>
+                                            <div class="form-group mb-3">
+                                                <label class="form-label mb-2" for="details">ডিটেইলস</label>
+                                                <textarea name="details[]" class="form-control details-input" rows="4" placeholder="ডিটেইলস লিখুন..."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label mb-2">{{ __('প্রোডাক্টের ছবি') }}</label>
+                                                <div class="d-block position-relative photo-wrapper border rounded p-2 text-center" style="background: #f8f9fa;">
+                                                    <img class="photo-preview img-fluid rounded" src="{{ asset('cover/default-cover.jpg') }}" alt="your image" style="cursor: pointer; max-height: 100px; width: 100%; object-fit: cover;">
+                                                    <input type="file" name="photo[]" class="photo-input d-none" accept="image/*">
+                                                    <div class="mt-2">
+                                                        <button type="button" class="btn btn-sm btn-secondary photo-browse-btn w-100"><i class="fa-solid fa-camera"></i> ছবি নির্বাচন</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -248,7 +275,7 @@
 
                         <div class="col-lg-4">
                             <div class="form-group mb-3">
-                                <label for="order_date" class="form-label mb-2">অর্ডারের তারিখ</label>
+                                <label for="order_date" class="form-label mb-2">ক্রয়ের তারিখ</label>
                                 <input type="date" class="form-control @error('order_date')
                                     is-invalid
                                 @enderror" rows="5" name="order_date" value="{{ old('order_date', now()->format('Y-m-d')) }}" id="order_date">
@@ -357,7 +384,7 @@
                         <td class="text-center">
                             <div class="action-btns d-flex align-items-center">
                                 <div>
-                                    <a href=""
+                                    <a href="{{ route('purchase.show', $transaction->id) }}"
                                         class="text-success me-2" data-toggle="tooltip"
                                         data-placement="top" data-bs-original-title="View">
                                         <i class="fa-solid fa-eye"></i>
@@ -473,8 +500,13 @@
             var rotiInputs = container.querySelectorAll('.roti-input');
             var pointInputs = container.querySelectorAll('.point-input');
             var priceInputs = container.querySelectorAll('.unit_price_input');
+            var rawGoldInputs = container.querySelectorAll('.raw-gold-input');
 
             priceInputs.forEach(input => {
+                input.addEventListener('input', CalculateTotal);
+            });
+
+            rawGoldInputs.forEach(input => {
                 input.addEventListener('input', CalculateTotal);
             });
             voriInputs.forEach(input => {
@@ -495,6 +527,15 @@
             pointInputs.forEach(input => {
                 input.addEventListener('input', convertToGrams);
                 input.addEventListener('input', CalculateTotal);
+            });
+
+            var karatSelects = container.querySelectorAll('.karat-select');
+            karatSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    var cardBody = this.closest('.card-body');
+                    calculateRawGold(cardBody);
+                    CalculateTotalForCard(cardBody);
+                });
             });
         });
 
@@ -549,6 +590,8 @@
             },
             success: function(response) {
                 card.querySelector('.form-control[id="gram"]').value = response.grams.toFixed(3);
+                calculateRawGold(card);
+                CalculateTotalForCard(card);
             },
             error: function(xhr, status, error) {
                 console.error('AJAX error:', error);
@@ -558,30 +601,55 @@
         });
     }
 
-    function CalculateTotal() {
-        var card = this.closest('.card-body');
-        var unit_price = card.querySelector('.unit_price_input').value || 0;
-        var vori = card.querySelector('.vori-input').value || 0;
-        var ana = card.querySelector('.ana-input').value || 0;
-        var roti = card.querySelector('.roti-input').value || 0;
-        var point = card.querySelector('.point-input').value || 0;
+    function calculateRawGold(card) {
+        var gramInput = card.querySelector('.form-control[id="gram"]');
+        var karatSelect = card.querySelector('.karat-select');
+        var rawGoldInput = card.querySelector('.raw-gold-input');
 
-        $.ajax({
-            url: $('#form2').data('calculate-url'),
-            type: "POST",
-            data: {
-                unit_price: unit_price,
-                bhori: vori,
-                ana: ana,
-                roti: roti,
-                point: point,
-                _token: "{{ csrf_token() }}"
-            },
-            success: function(response) {
-                card.querySelector('.form-control[id="price"]').value = response.total_price.toFixed(3);
-                CalculateTotalPrice();
-            }
-        });
+        if (!gramInput || !karatSelect || !rawGoldInput) return;
+
+        var gram = parseFloat(gramInput.value) || 0;
+        var karat = karatSelect.value;
+        var rawGold = 0;
+
+        if (karat === '22K') {
+            rawGold = gram * 0.91;
+        } else if (karat === '21K') {
+            rawGold = gram * 0.87;
+        } else if (karat === '18K') {
+            rawGold = gram * 0.75;
+        } else if (karat === '24K') {
+            rawGold = gram * 0.98;
+        } else if (karat === 'Paeine') {
+            rawGold = gram * 0.50;
+        }
+
+        rawGoldInput.value = rawGold.toFixed(3);
+    }
+
+    function CalculateTotal() {
+        CalculateTotalForCard(this.closest('.card-body'));
+    }
+
+    function CalculateTotalForCard(card) {
+        var unit_price = parseFloat(card.querySelector('.unit_price_input').value) || 0;
+
+        // এক গ্রামের মূল্য = একক মূল্য/ভরি ÷ 11.664
+        var one_gram_price = unit_price ? (unit_price / 11.664) : 0;
+
+        var oneGramPriceInput = card.querySelector('.one_gram_price_input');
+        if (oneGramPriceInput) {
+            oneGramPriceInput.value = one_gram_price ? one_gram_price.toFixed(3) : '';
+        }
+
+        // ক্রয় মূল্য = এক গ্রামের মূল্য × পাকা সোনা (গ্রাম)
+        var raw_gold = parseFloat(card.querySelector('.raw-gold-input').value) || 0;
+        var total_price = one_gram_price * raw_gold;
+
+        card.querySelector('.form-control[id="price"]').value = total_price.toFixed(3);
+
+        // মোট মূল্য = সব ক্রয় মূল্যের যোগফল
+        CalculateTotalPrice();
     }
 
     function CalculateTotalPrice() {

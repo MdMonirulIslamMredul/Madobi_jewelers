@@ -124,9 +124,6 @@ class PurchaseController extends Controller
             $item_category_id = $request->category_id[$i] ?? null;
             $item_product_id = $request->product_id[$i] ?? null;
             $item_karat = $request->karat[$i] ?? null;
-            if ($item_karat === 'Paeine') {
-                $item_karat = $request->karat_other[$i] ?? null;
-            }
             $item_unit_price = $request->unit_price[$i] ?? null;
             $item_gram = $request->gram[$i] ?? 0;
             $item_total_price = $request->price[$i] ?? 0;
@@ -498,9 +495,6 @@ class PurchaseController extends Controller
             $item_category_id = $request->category_id[$i] ?? null;
             $item_product_id = $request->product_id[$i] ?? null;
             $item_karat = $request->karat[$i] ?? null;
-            if ($item_karat === 'Paeine') {
-                $item_karat = $request->karat_other[$i] ?? null;
-            }
             $item_unit_price = $request->unit_price[$i] ?? null;
             $item_gram = $request->gram[$i] ?? 0;
             $item_total_price = $request->price[$i] ?? 0;
