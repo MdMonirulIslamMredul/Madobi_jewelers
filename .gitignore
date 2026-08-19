@@ -3,15 +3,96 @@ node_modules/
 
 # Ignore Composer dependencies and generated vendor tooling
 vendor/
+/vendor/*
+/vendor/composer/*
 
 # Ignore the .env file because it holds secret keys
 .env
+.env.backup
+.env.local
+.env.*.local
 
-/vendor/* 
+# Bootstrap cache
 /bootstrap/cache/*
-/vendor/composer/*
+!/bootstrap/cache/.gitkeep
 
+# Storage folders
 storage/framework/views/*
+!/storage/framework/views/.gitkeep
 storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
 storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
 storage/framework/testing/*
+/storage/app/*
+!/storage/app/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.phpunit.result.cache
+phpunit.xml.bak
+
+# Lock files (optional - uncomment to track)
+# composer.lock
+# package-lock.json
+# yarn.lock
+
+# Laravel Tinker
+.php_cs
+.php_cs.cache
+
+# IDE Helper
+_ide_helper.php
+.phpstorm.meta.php
+
+# Public - Ignore uploaded images and user content
+/public/hot
+/public/storage
+/public/user/*.png
+/public/user/*.jpg
+/public/user/*.jpeg
+/public/user/*.gif
+/public/user/*.webp
+/public/profile/*.png
+/public/profile/*.jpg
+/public/profile/*.jpeg
+/public/profile/*.gif
+/public/profile/*.webp
+/public/cover/*.png
+/public/cover/*.jpg
+/public/cover/*.jpeg
+/public/cover/*.gif
+/public/cover/*.webp
+/public/About/*.png
+/public/About/*.jpg
+/public/About/*.jpeg
+/public/About/*.gif
+/public/About/*.webp
+/public/admin/*.png
+/public/admin/*.jpg
+/public/admin/*.jpeg
+/public/admin/*.gif
+/public/admin/*.webp
+# Ignore all image files recursively in public
+/public/**/*.png
+/public/**/*.jpg
+/public/**/*.jpeg
+/public/**/*.gif
+/public/**/*.webp
+/public/**/*.svg
+
+# Misc
+auth.json
+npm-debug.log
+yarn-error.log
+Homestead.json
+Homestead.yaml
