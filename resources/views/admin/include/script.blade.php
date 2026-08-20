@@ -3,6 +3,14 @@
 
 <!-- Bootstrap Core JavaScript -->
 <script src="{{ asset('admin/assets/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+<script>
+    if (window.jQuery) {
+        $.fn.modal = $.fn.modal || function(){};
+        if (!$.fn.modal.Constructor) {
+            $.fn.modal.Constructor = { VERSION: '5.3.0' };
+        }
+    }
+</script>
 
 <!-- Bootstrap-select JavaScript -->
 <script src="{{ asset('admin/assets/node_modules/bootstrap-select/bootstrap-select.min.js') }}"></script>

@@ -47,10 +47,21 @@
                 </li>
                 <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
                                 <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z" />
-                            </svg></i><span class="hide-menu">কারিগর </span></a>
+                            </svg></i><span class="hide-menu">কারিগর 
+                                @php
+                                    $karigorProgressCount = \App\Models\KarigorJob::where('status', 'in_progress')->count();
+                                @endphp
+                                @if($karigorProgressCount > 0)
+                                    <span class="badge bg-danger ms-2">{{ $karigorProgressCount }}</span>
+                                @endif
+                            </span></a>
                     <ul aria-expanded="false" class="collapse">
-                        <li><a href="{{route('karigor.index')}}">কারিগর স্টক</a></li>
-                        <li><a href="{{route('karigor.product')}}">কারিগর প্রোডাক্ট</a></li>
+                        
+                        <li><a href="{{route('karigor.stock')}}">কারিগর স্টক</a></li>
+                        <li><a href="{{route('karigor.job')}}">অ্যাসাইন করা জব</a></li>
+                        <li><a href="{{route('karigor.index')}}">কারিগর এর তালিকা</a></li>
+                         {{-- <li><a href="{{route('karigor.product')}}">কারিগর প্রোডাক্ট</a></li> --}}
+                       
                     </ul>
                 </li>
                 <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
@@ -58,10 +69,15 @@
                             </svg></i><span class="hide-menu">স্টক</span></a>
                     <ul aria-expanded="false" class="collapse">
                         <li><a href="#">স্টক ড্যাশবোর্ড</a></li>
-                        <li><a href="{{ route('hold.stock') }}">নতুন স্টক তালিকা</a></li>
-                        <li><a href="{{ route('stock.index') }}">টোটাল স্টক তালিকা</a></li>
-                        <li><a href="{{ route('shop.stock') }}">দোকান স্টক তালিকা</a></li>
-                        <li><a href="{{ route('warehouse.stock') }}">গুদাম স্টক তালিকা</a></li>
+                        <li><a href="{{ route('hold.stock') }}">Unsorted স্টক তালিকা</a></li>
+                        
+                        <li><a href="{{ route('shop.stock.list') }}">দোকান স্টক তালিকা (পণ্য)</a></li>
+                        <li><a href="{{ route('warehouse.stock.list') }}">গুদাম স্টক তালিকা (পণ্য)</a></li>
+                        {{-- <li><a href="{{ route('karigor.stock') }}">কারিগর স্টক তালিকা (পণ্য)</a></li> --}}
+                        <li><a href="{{ route('total.stock.list') }}">টোটাল স্টক তালিকা (পণ্য)</a></li>
+                        <li><a href="{{ route('stock.index') }}">টোটাল স্টক (ওজন) </a></li>
+                        {{-- <li><a href="{{ route('shop.stock') }}">দোকান স্টক তালিকা(ওজন) </a></li>
+                        <li><a href="{{ route('warehouse.stock') }}">গুদাম স্টক তালিকা(ওজন)</a></li> --}}
 
                     </ul>
                 </li>

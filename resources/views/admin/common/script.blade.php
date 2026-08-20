@@ -31,7 +31,7 @@
         let form = $(this).closest('form');
         event.preventDefault();
         Swal.fire({
-            title: "আপনি কি পরিবর্তন সেভ করতে চান?"
+            title: "আপনি কি পরিবর্তন সেভ করতে চান?",
             showDenyButton: true,
             showCancelButton: true,
             confirmButtonText: "হাঁ",
