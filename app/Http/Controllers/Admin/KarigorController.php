@@ -22,70 +22,210 @@ class KarigorController extends Controller
 {
     public function karigor_index()
     {
-        $karigors = Karigor::latest()->get();
+        $users = User::where('role_id', 5)
+            ->orWhereHas('role', function($query) {
+                $query->where('role_name', 'karigor');
+            })
+            ->latest()
+            ->get();
 
-        return view('admin.karigor.karigor',compact('karigors'));
+        return view('admin.karigor.karigor', compact('users'));
     }
+
+    public function karigor_create()
+    {
+        return view('admin.karigor.karigorCreate');
+    }
+
+    public function karigor_store(Request $request)
+    {
+        $request->validate([
+            'name'      => 'required|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'phone'     => 'nullable|string|max:20',
+            'email'     => 'nullable|email|max:255',
+            'address'   => 'nullable|string',
+            'password'  => 'nullable|string|min:6',
+            'image'     => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
+        ]);
+
+        $role = \App\Models\Role::where('role_name', 'karigor')->first();
+        $role_id = $role ? $role->id : 5;
+
+        if ($request->hasFile('image')) {
+            $imageName = 'user_' . time() . '.' . $request->image->extension();
+            $request->image->move(public_path('user'), $imageName);
+        } else {
+            $imageName = 'default_user.jpg';
+        }
+
+        $user = new User();
+        $user->role_id   = $role_id;
+        $user->name      = $request->name;
+        $user->last_name = $request->last_name;
+        $user->phone     = $request->phone;
+        $user->email     = $request->email ?: ($request->phone ? $request->phone . '@karigor.com' : 'karigor_' . time() . '@madobi.com');
+        $user->address   = $request->address;
+        $user->password  = \Illuminate\Support\Facades\Hash::make($request->password ?: '12345678');
+        $user->image     = $imageName;
+        $user->is_active = true;
+        $user->save();
+
+        $karigor = new Karigor();
+        $karigor->karigor_id = $user->id;
+        $karigor->save();
+
+        return redirect()->route('karigor.index')->with('message', 'নতুন কারিগর সফলভাবে তৈরি করা হয়েছে 🙂');
+    }
+
     public function karigor_edit($id)
     {
-        $karigor = Karigor::find($id);
+        $user = User::find($id);
+        if (!$user) {
+            $karigor = Karigor::find($id);
+            if ($karigor && $karigor->user) {
+                $user = $karigor->user;
+            }
+        }
 
-        return view('admin.karigor.karigorEdit',compact('karigor'));
+        if (!$user) {
+            return redirect()->route('karigor.index')->with('error', 'কারিগর পাওয়া যায়নি!');
+        }
+
+        $karigor = Karigor::where('karigor_id', $user->id)->first();
+        if (!$karigor) {
+            $karigor = new Karigor();
+            $karigor->karigor_id = $user->id;
+            $karigor->save();
+        }
+
+        return view('admin.karigor.karigorEdit', compact('karigor', 'user'));
     }
-    public function karigor_stock()
+
+    public function karigor_update(Request $request)
+    {
+        $request->validate([
+            'k_id'      => 'required',
+            'name'      => 'required|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'phone'     => 'nullable|string|max:20',
+            'email'     => 'nullable|email|max:255',
+            'address'   => 'nullable|string',
+            'password'  => 'nullable|string|min:6',
+            'image'     => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
+        ]);
+
+        $karigor = Karigor::with('user')->find($request->k_id);
+        if ($karigor && $karigor->user) {
+            $user = $karigor->user;
+        } else {
+            $user = User::findOrFail($request->k_id);
+        }
+
+        $user->name      = $request->name;
+        $user->last_name = $request->last_name;
+        $user->phone     = $request->phone;
+        if ($request->filled('email')) {
+            $user->email = $request->email;
+        }
+        $user->address   = $request->address;
+
+        if ($request->filled('password')) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
+
+        if ($request->hasFile('image')) {
+            $imageName = 'user_' . time() . '.' . $request->image->extension();
+            $request->image->move(public_path('user'), $imageName);
+            $user->image = $imageName;
+        }
+
+        $user->save();
+
+        return redirect()->route('karigor.index')->with('message', 'কারিগর তথ্য সফলভাবে আপডেট করা হয়েছে 🙂');
+    }
+
+    public function karigor_delete(Request $request)
+    {
+        $id = $request->user_id ?? $request->karigor_id;
+        $user = User::find($id);
+        if (!$user) {
+            $karigor = Karigor::find($id);
+            if ($karigor && $karigor->user) {
+                $user = $karigor->user;
+            }
+        }
+
+        if ($user) {
+            Karigor::where('karigor_id', $user->id)->delete();
+            $user->delete();
+        }
+
+        return redirect()->route('karigor.index')->with('message', 'কারিগর সফলভাবে মুছে ফেলা হয়েছে 🗑️');
+    }
+
+    public function karigor_stock(Request $request)
     {
         $users = User::whereHas('role', function($query) {
             $query->where('role_name', 'karigor');
-        })->latest()->get();
+        })->orWhere('role_id', 5)->latest()->get();
 
         $categories = ProductCategory::latest()->get();
 
-        return view('admin.karigor.karigorStock',compact('users','categories'));
-    }
-    public function karigor_stock_store(Request $request)
-    {
-        $request_gold = [
-            'vori' => $request->bhori,
-            'ana' => $request->ana,
-            'roti' => $request->roti,
-            'point' => $request->point,
-        ];
-        $total=calculateTotalGold($request_gold);
+        $categoryId = $request->get('category_id', 'all');
+        $karat = $request->get('karat', 'all');
+        $jobStatus = $request->get('job_status', 'all');
+        $karigorId = $request->get('karigor_id', 'all');
 
-        $karigor = new Karigor;
-        $karigor->karigor_id = $request->user_id;
-        $karigor->category_id = $request->category_id;
-        $karigor->product_id = $request->product_id;
-        $karigor->bhori = $total['vori'];
-        $karigor->ana = $total['ana'];
-        $karigor->roti = $total['roti'];
-        $karigor->point = $total['point'];
-        $karigor->gram = $request->gram;
-        $karigor->save();
+        $query = \App\Models\Purchase::with([
+            'invoice',
+            'productCategory',
+            'product',
+            'user',
+            'activeKarigorJob.karigor',
+            'karigorJobs.karigor',
+            'locationHistories.transferredBy',
+            'locationHistories.karigor'
+        ])
+        ->whereIn('location', ['is_karigor', 'in_progress']);
 
-        return redirect()->route('karigor.index')->with('message', 'Karigor Stock Created Successfully');
-        
-    }
-    public function karigor_update(Request $request)
-    {
-        // dd($request);
-        $request_gold = [
-            'vori' => $request->bhori,
-            'ana' => $request->ana,
-            'roti' => $request->roti,
-            'point' => $request->point,
-        ];
-        $total=calculateTotalGold($request_gold);
+        if ($categoryId !== 'all') {
+            $query->where('category_id', $categoryId);
+        }
 
-        $karigor = Karigor::find($request->k_id);
-        $karigor->bhori = $total['vori'];
-        $karigor->ana = $total['ana'];
-        $karigor->roti = $total['roti'];
-        $karigor->point = $total['point'];
-        $karigor->gram = $request->gram;
-        $karigor->save();
+        if ($karat !== 'all') {
+            $query->where('karat', $karat);
+        }
 
-        return redirect()->route('karigor.index')->with('message', 'Karigor Stock Updated Successfully');
+        if ($jobStatus !== 'all') {
+            if ($jobStatus === 'unassigned') {
+                $query->whereDoesntHave('activeKarigorJob', function($q) {
+                    $q->whereIn('status', ['in_progress', 'completed']);
+                });
+            } else {
+                $query->whereHas('activeKarigorJob', function($q) use ($jobStatus) {
+                    $q->where('status', $jobStatus);
+                });
+            }
+        }
+
+        if ($karigorId !== 'all') {
+            $query->whereHas('activeKarigorJob', function($q) use ($karigorId) {
+                $q->where('karigor_id', $karigorId);
+            });
+        }
+
+        $purchases = $query->latest()->get();
+
+        return view('admin.karigor.karigorStock', compact(
+            'users',
+            'categories',
+            'purchases',
+            'categoryId',
+            'karat',
+            'jobStatus',
+            'karigorId'
+        ));
     }
 
    public function karigor_product()
