@@ -1,102 +1,85 @@
 @extends('admin.master')
 @section('title')
-কারিগর
+    কারিগর
 @endsection
 
 @push('admin_style')
 @include('admin.common.style')
 @endpush
-@section('body')
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+@section('body')
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header">
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3>কারিগর স্টক</h3>
+                        <h3>কারিগর তালিকা</h3>
                     </div>
                     <div>
-                        <a href="{{route('karigor.stock')}}" class="btn btn-dark">নতুন কারিগর স্টক তৈরি করুন</a>
+                        <a href="{{route('karigor.create')}}" class="btn btn-dark"><i class="fa-solid fa-plus me-1"></i>নতুন কারিগর তৈরি করুন</a>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="card">
-            <div class="card-header">
-                <table id="config-table" class="table display table-striped border no-wrap">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>কারিগর</th>
-                        <th>ক্যাটাগরি</th>
-                        <th>পরিমাণ</th>
-                        <th>পরিমাণ(গ্রাম হিসাব)</th>
-                        <th>একশন</th>
-                        
-                    </tr>
-                    </thead>
-                    <tbody>
-                        @php $sl = 1; @endphp
-                        @forelse ($karigors as $karigor)
-                        <tr>
-                            <td>
-                                <strong>{{ $sl }}</strong>
-                            </td>
-                            <td class="text-center">
-                                <div class="d-flex justify-content-start">
-                                    <div>
-                                        <img alt="avatar" src="{{ asset('user/' . $karigor->user->image) }}" class="rounded-circle" style="width:40px; height: 40px">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="config-table" class="table display table-striped border no-wrap">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>কারিগর</th>
+                                <th>ফোন নম্বর</th>
+                                <th>ইমেইল</th>
+                                <th>ঠিকানা</th>
+                                <th class="text-center">একশন</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php $sl = 1; @endphp
+                            @forelse ($users as $user)
+                            <tr>
+                                <td>
+                                    <strong>{{ $sl }}</strong>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img alt="avatar" src="{{ ($user->image && $user->image !== 'default_user.jpg') ? asset('user/' . $user->image) : asset('cover/default_user.jpg') }}" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;">
+                                        <div>
+                                            <div class="fw-bold">{{ $user->name ?? 'N/A' }} {{ $user->last_name ?? '' }}</div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        {{ $karigor->user->name }}<br><a href="#">{{$karigor->user->phone}}</a>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{{ $karigor->category->category_name ?? 'N/A'}}</td>
-                            <td>{{ $karigor->bhori ?? 0}} ভরি, {{ $karigor->ana ?? 0}} আনা, {{ $karigor->roti ?? 0}} রতি, {{ $karigor->point ?? 0}} পয়েন্ট</td>
-                            <td>{{ $karigor->gram ?? 0}} গ্রাম</td>
-                            <td class="text-center">
-                                <div class="action-btns d-flex align-items-center">
-                                    <div> 
-                                        <a href=""
-                                            class="text-success me-2" data-toggle="tooltip"
-                                            data-placement="top" data-bs-original-title="View" data-toggle="modal" data-target="#KarigorModal">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </a>     
-                                    </div>
-                                    <div>
-                                        <a href="{{ route('karigor.edit', $karigor->id) }}"
+                                </td>
+                                <td>{{ $user->phone ?? '—' }}</td>
+                                <td>{{ $user->email ?? '—' }}</td>
+                                <td>{{ $user->address ?? '—' }}</td>
+                                <td class="text-center">
+                                    <div class="action-btns d-flex align-items-center justify-content-center gap-2">
+                                        <a href="{{ route('karigor.edit', $user->id) }}"
                                             class="text-info" data-toggle="tooltip"
-                                            data-placement="top" data-bs-original-title="Edit"><i class="fa-solid fa-pen-to-square fa-fw"></i>
+                                            data-placement="top" title="ইডিট করুন">
+                                            <i class="fa-solid fa-pen-to-square fa-fw fs-5"></i>
                                         </a>
-                                    </div>
-                                    <div>
-                                        <form action="#"
-                                            method="POST">
+                                        <form action="{{ route('karigor.delete') }}" method="POST" onsubmit="return confirm('আপনি কি সত্যিই এই কারিগর মুছে ফেলতে চান?');">
                                             @csrf
-                                            <input type="hidden" name="karigor_id" value="{{ $karigor->id }}">
-                                            <button type="submit" class="text-warning btn_custom show_confirm" data-toggle="tooltip"
-                                            data-placement="top" data-bs-original-title="Delete">
-                                                <i class="fa-solid fa-trash-can fa-fw"></i>
+                                            <input type="hidden" name="user_id" value="{{ $user->id }}">
+                                            <button type="submit" class="btn btn-link text-danger p-0 border-0" title="মুছে ফেলুন">
+                                                <i class="fa-solid fa-trash-can fa-fw fs-5"></i>
                                             </button>
                                         </form>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @php $sl++ @endphp
-                        @empty
-                        No Data Found!
-                        @endforelse
-                    </tbody>
-
-                </table>
+                                </td>
+                            </tr>
+                            @php $sl++ @endphp
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">কোন কারিগর পাওয়া যায়নি!</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-
-   
 @endsection
 
 @push('admin_script')
