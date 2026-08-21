@@ -39,4 +39,23 @@ class Purchase extends Model
         return $this->belongsTo(Invoice::class, 'invoice_id', 'id');
     }
 
+    public function locationHistories()
+    {
+        return $this->hasMany(PurchaseLocationHistory::class, 'purchase_id')->latest();
+    }
+
+    public function karigorJobs()
+    {
+        return $this->hasMany(KarigorJob::class, 'purchase_id')->latest();
+    }
+
+    public function activeKarigorJob()
+    {
+        return $this->hasOne(KarigorJob::class, 'purchase_id')->latestOfMany();
+    }
+
+    public function currentKarigorJob()
+    {
+        return $this->belongsTo(KarigorJob::class, 'karigor_job_id');
+    }
 }
