@@ -414,7 +414,7 @@ class PurchaseController extends Controller
      */
     public function show($id)
     {
-        $transaction = Transaction::with(['purchases.product', 'purchases.productCategory', 'user'])->findOrFail($id);
+        $transaction = Transaction::with(['purchases.product', 'purchases.productCategory', 'purchases.locationHistories.transferredBy', 'purchases.locationHistories.karigor', 'user'])->findOrFail($id);
         return view('admin.purchase.show', compact('transaction'));
     }
 
@@ -534,6 +534,14 @@ class PurchaseController extends Controller
                 'receive_date' => $request->receive_date,
                 'location' => $location,
                 'photo' => $imageName,
+            ]);
+
+            \App\Models\PurchaseLocationHistory::create([
+                'purchase_id'    => $purchase->id,
+                'from_location'  => null,
+                'to_location'    => $location,
+                'transferred_by' => auth()->id(),
+                'note'           => 'Initial Purchase Entry',
             ]);
 
             $totalBhori += $total['vori'];

@@ -144,12 +144,15 @@
                 @foreach ($transaction->purchases as $index => $purchase)
                 <div class="purchase-item-card">
                     <div class="item-card-header d-flex justify-content-between align-items-center">
-                        <span>
-                            QTY {{ $index + 1 }}
-                            &mdash;
-                            {{ $purchase->productCategory->category_name ?? '—' }}
-                            /
-                            {{ $purchase->product->product_name ?? '—' }}
+                        <span class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="badge bg-warning text-dark border">ক্রয় আইডি: #{{ $purchase->id }}</span>
+                            <span>
+                                QTY {{ $index + 1 }}
+                                &mdash;
+                                {{ $purchase->productCategory->category_name ?? '—' }}
+                                /
+                                {{ $purchase->product->product_name ?? '—' }}
+                            </span>
                         </span>
                         <span class="badge-karat">{{ $purchase->karat }}</span>
                     </div>
@@ -212,6 +215,62 @@
                             </div>
 
                         </div>
+
+                        {{-- Product Location History Timeline --}}
+                        <div class="mt-4 pt-3 border-top">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fa-solid fa-clock-rotate-left me-2"></i>অবস্থান পরিবর্তনের ইতিহাস (Location History)
+                            </h6>
+                            @if($purchase->locationHistories && count($purchase->locationHistories) > 0)
+                                <div class="position-relative ps-4 ms-2 mt-2" style="border-left: 2px dashed #0d6efd;">
+                                    @foreach($purchase->locationHistories as $history)
+                                        <div class="position-relative mb-3">
+                                            <div class="position-absolute bg-primary rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm"
+                                                 style="width: 24px; height: 24px; left: -29px; top: 2px;">
+                                                <i class="fa-solid fa-location-dot fa-xs"></i>
+                                            </div>
+                                            <div class="card border-0 bg-light p-3 shadow-sm" style="border-radius:8px;">
+                                                <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+                                                    <span class="badge bg-white text-dark border p-2">
+                                                        {{ str_replace(['is_hold', 'is_karigor', 'is_shop', 'is_warehouse'], ['Hold (হোল্ড)', 'Karigor (কারিগর)', 'Shop (শপ)', 'Warehouse (গুদাম)'], $history->from_location ?: 'নতুন ক্রয়') }}
+                                                        &nbsp;<i class="fa-solid fa-arrow-right text-primary"></i>&nbsp;
+                                                        <strong class="text-primary">{{ str_replace(['is_hold', 'is_karigor', 'is_shop', 'is_warehouse'], ['Hold (হোল্ড)', 'Karigor (কারিগর)', 'Shop (শপ)', 'Warehouse (গুদাম)'], $history->to_location) }}</strong>
+                                                    </span>
+                                                    <small class="text-muted"><i class="fa-regular fa-clock me-1"></i>{{ $history->created_at ? $history->created_at->format('d M Y, h:i A') : '—' }}</small>
+                                                </div>
+
+                                                @if($history->karigor)
+                                                    <div class="small text-dark mt-1">
+                                                        👤 <strong>অর্পিত কারিগর:</strong> {{ $history->karigor->name }} {{ $history->karigor->last_name ?? '' }} (📱 {{ $history->karigor->phone ?? '—' }})
+                                                    </div>
+                                                @endif
+
+                                                @if($history->task_type)
+                                                    <div class="small text-dark mt-1">
+                                                        🛠️ <strong>কাজের ধরন:</strong> {{ $history->task_type }}
+                                                        @if($history->extra_raw_gold)
+                                                            | 🪙 <strong>অতিরিক্ত র গোল্ড:</strong> {{ $history->extra_raw_gold }} গ্রাম
+                                                        @endif
+                                                    </div>
+                                                @endif
+
+                                                <div class="small text-muted mt-1">
+                                                    <i class="fa-solid fa-user-check me-1"></i>স্থানান্তরকারী: <strong>{{ $history->transferredBy->name ?? 'System' }}</strong>
+                                                    @if($history->note)
+                                                        &nbsp;|&nbsp; 📝 {{ $history->note }}
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-muted small py-1">
+                                    <i class="fa-solid fa-info-circle me-1"></i>কোন অবস্থান হিস্ট্রি পাওয়া যায়নি।
+                                </div>
+                            @endif
+                        </div>
+
                     </div>
                 </div>
                 @endforeach
