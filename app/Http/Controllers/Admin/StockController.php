@@ -16,8 +16,8 @@ class StockController extends Controller
 {
    public function stock_index()
    {
-    $stocks = Stock::latest()->get();
-    return view('admin.stock.mainStock',compact('stocks'));
+       $stocks = Stock::latest()->get();
+       return view('admin.stock.mainStock', compact('stocks'));
    }
 
 
@@ -36,7 +36,10 @@ class StockController extends Controller
 
    public function hold_stock_index()
    {
-       $purchases = \App\Models\Purchase::where('location', 'is_hold')->latest()->get();
+       $purchases = \App\Models\Purchase::with(['invoice', 'productCategory', 'product', 'user'])
+           ->where('location', 'is_hold')
+           ->latest()
+           ->get();
        return view('admin.stock.stock', compact('purchases'));
    }
 
@@ -368,6 +371,187 @@ class StockController extends Controller
         }
         
        
-     return redirect()->back()->with('message', 'Stock Deleted Successfully 🙂');
+        return redirect()->back()->with('message', 'Stock Deleted Successfully 🙂');
+    }
+
+    public function send_to_shop(Request $request)
+    {
+        $purchase = \App\Models\Purchase::findOrFail($request->purchase_id);
+        $fromLocation = $purchase->location;
+
+        // Update the purchase location
+        $purchase->location = 'is_shop';
+        $purchase->save();
+
+        \App\Models\PurchaseLocationHistory::create([
+            'purchase_id'    => $purchase->id,
+            'from_location'  => $fromLocation,
+            'to_location'    => 'is_shop',
+            'transferred_by' => auth()->id(),
+            'note'           => 'Sent to Shop Stock',
+        ]);
+
+        // Gold amount from purchase
+        $gold = [
+            'vori' => $purchase->bhori ?? 0,
+            'ana'  => $purchase->ana   ?? 0,
+            'roti' => $purchase->roti  ?? 0,
+            'point'=> $purchase->point ?? 0,
+        ];
+
+        $prev = Shop::where('product_id', $purchase->product_id)
+                    ->where('category_id', $purchase->category_id)
+                    ->latest()->first();
+
+        if ($prev) {
+            $prevGold = ['vori' => $prev->bhori, 'ana' => $prev->ana, 'roti' => $prev->roti, 'point' => $prev->point];
+            $updated  = addGold($prevGold, $gold);
+            $prev->karat  = $purchase->karat;
+            $prev->bhori  = $updated['vori'];
+            $prev->ana    = $updated['ana'];
+            $prev->roti   = $updated['roti'];
+            $prev->point  = $updated['point'];
+            $prev->gram   = ($prev->gram ?? 0) + ($purchase->gram ?? 0);
+            $prev->qty    = ($prev->qty  ?? 0) + 1;
+            $prev->save();
+        } else {
+            $shop = new Shop;
+            $shop->product_id  = $purchase->product_id;
+            $shop->category_id = $purchase->category_id;
+            $shop->karat       = $purchase->karat;
+            $shop->bhori       = $gold['vori'];
+            $shop->ana         = $gold['ana'];
+            $shop->roti        = $gold['roti'];
+            $shop->point       = $gold['point'];
+            $shop->gram        = $purchase->gram ?? 0;
+            $shop->qty         = 1;
+            $shop->save();
+        }
+
+        return redirect()->back()->with('message', 'পণ্যটি সফলভাবে শপে পাঠানো হয়েছে 🏪');
+    }
+
+    public function send_to_warehouse(Request $request)
+    {
+        $purchase = \App\Models\Purchase::findOrFail($request->purchase_id);
+        $fromLocation = $purchase->location;
+
+        // Update the purchase location
+        $purchase->location = 'is_warehouse';
+        $purchase->save();
+
+        \App\Models\PurchaseLocationHistory::create([
+            'purchase_id'    => $purchase->id,
+            'from_location'  => $fromLocation,
+            'to_location'    => 'is_warehouse',
+            'transferred_by' => auth()->id(),
+            'note'           => 'Sent to Warehouse Stock',
+        ]);
+
+        // Gold amount from purchase
+        $gold = [
+            'vori' => $purchase->bhori ?? 0,
+            'ana'  => $purchase->ana   ?? 0,
+            'roti' => $purchase->roti  ?? 0,
+            'point'=> $purchase->point ?? 0,
+        ];
+
+        $prev = Warehouse::where('product_id', $purchase->product_id)
+                         ->where('category_id', $purchase->category_id)
+                         ->latest()->first();
+
+        if ($prev) {
+            $prevGold = ['vori' => $prev->bhori, 'ana' => $prev->ana, 'roti' => $prev->roti, 'point' => $prev->point];
+            $updated  = addGold($prevGold, $gold);
+            $prev->karat  = $purchase->karat;
+            $prev->bhori  = $updated['vori'];
+            $prev->ana    = $updated['ana'];
+            $prev->roti   = $updated['roti'];
+            $prev->point  = $updated['point'];
+            $prev->gram   = ($prev->gram ?? 0) + ($purchase->gram ?? 0);
+            $prev->qty    = ($prev->qty  ?? 0) + 1;
+            $prev->save();
+        } else {
+            $warehouse = new Warehouse;
+            $warehouse->product_id  = $purchase->product_id;
+            $warehouse->category_id = $purchase->category_id;
+            $warehouse->karat       = $purchase->karat;
+            $warehouse->bhori       = $gold['vori'];
+            $warehouse->ana         = $gold['ana'];
+            $warehouse->roti        = $gold['roti'];
+            $warehouse->point       = $gold['point'];
+            $warehouse->gram        = $purchase->gram ?? 0;
+            $warehouse->qty         = 1;
+            $warehouse->save();
+        }
+
+        return redirect()->back()->with('message', 'পণ্যটি সফলভাবে গুদামে পাঠানো হয়েছে 🏭');
+    }
+
+    public function shop_stock_list()
+    {
+        $purchases = \App\Models\Purchase::with(['invoice', 'productCategory', 'product', 'user'])
+            ->where('location', 'is_shop')
+            ->latest()
+            ->get();
+        return view('admin.stock.shopStockList', compact('purchases'));
+    }
+
+    public function warehouse_stock_list()
+    {
+        $purchases = \App\Models\Purchase::with(['invoice', 'productCategory', 'product', 'user'])
+            ->where('location', 'is_warehouse')
+            ->latest()
+            ->get();
+        return view('admin.stock.warehouseStockList', compact('purchases'));
+    }
+
+    public function send_to_hold(Request $request)
+    {
+        $purchase = \App\Models\Purchase::findOrFail($request->purchase_id);
+        $fromLocation = $purchase->location;
+
+        $purchase->location = 'is_hold';
+        $purchase->save();
+
+        \App\Models\PurchaseLocationHistory::create([
+            'purchase_id'    => $purchase->id,
+            'from_location'  => $fromLocation,
+            'to_location'    => 'is_hold',
+            'transferred_by' => auth()->id(),
+            'note'           => 'Returned to Hold Stock',
+        ]);
+
+        return redirect()->back()->with('message', 'পণ্যটি সফলভাবে হোল্ডে ফেরত পাঠানো হয়েছে ↩️');
+    }
+
+    public function send_to_karigor(Request $request)
+    {
+        $purchase = \App\Models\Purchase::findOrFail($request->purchase_id);
+        $fromLocation = $purchase->location;
+
+        $purchase->location = 'is_karigor';
+        $purchase->save();
+
+        \App\Models\PurchaseLocationHistory::create([
+            'purchase_id'         => $purchase->id,
+            'from_location'       => $fromLocation,
+            'to_location'         => 'is_karigor',
+            'transferred_by'      => auth()->id(),
+            'assigned_karigor_id' => $request->karigor_id ?? null,
+            'task_type'           => $request->task_type ?? null,
+            'extra_raw_gold'      => $request->extra_raw_gold ?? null,
+            'note'                => 'Sent to Karigor Stock',
+        ]);
+
+        return redirect()->back()->with('message', 'পণ্যটি সফলভাবে কারিগর Stock এ পাঠানো হয়েছে 🔨');
+    }
+
+    public function total_stock_list()
+    {
+        $purchases = \App\Models\Purchase::with(['invoice', 'productCategory', 'product', 'user'])
+            ->latest()
+            ->get();
+        return view('admin.stock.mainStockList', compact('purchases'));
     }
 }

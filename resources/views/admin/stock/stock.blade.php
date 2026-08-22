@@ -56,7 +56,7 @@ Unsorted স্টক তালিকা
                                 data-user-image="{{ ($purchase->user->image && $purchase->user->image !== 'default_user.jpg') ? asset('user/' . $purchase->user->image) : asset('cover/default_user.jpg') }}"
                                 data-user-photo1="{{ $purchase->user->photo1 ? asset('user/' . $purchase->user->photo1) : '' }}"
                                 title="ব্যবহারকারীর বিবরণ দেখুন">
-                                <div class="fw-semibold">{{ $purchase->order_date ? \Carbon\Carbon::parse($purchase->order_date)->format('d M Y') : '—' }}</div>
+                                <div class="fw-semibold">{{ $purchase->order_date ? \Carbon\Carbon::parse($purchase->order_date)->format('d M Y') : ($purchase->created_at ? \Carbon\Carbon::parse($purchase->created_at)->format('d M Y') : '—') }}</div>
                                 @if($purchase->invoice)
                                 <span class="badge bg-dark mt-1">INV #{{ $purchase->invoice_id }}</span>
                                 @endif
@@ -180,6 +180,19 @@ Unsorted স্টক তালিকা
                                                     class="dropdown-item d-flex align-items-center gap-2 text-success">
                                                     <i class="fa-solid fa-warehouse fa-fw"></i>
                                                     গুদামে পাঠান
+                                                </button>
+                                            </form>
+                                        </li>
+
+                                        {{-- Send to Karigor --}}
+                                        <li>
+                                            <form action="{{ route('stock.send-to-karigor') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="purchase_id" value="{{ $purchase->id }}">
+                                                <button type="submit"
+                                                    class="dropdown-item d-flex align-items-center gap-2 text-info">
+                                                    <i class="fa-solid fa-user-gear fa-fw"></i>
+                                                    কারিগরে পাঠান
                                                 </button>
                                             </form>
                                         </li>
