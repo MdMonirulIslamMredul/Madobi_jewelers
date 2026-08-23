@@ -25,7 +25,6 @@
                         <tr>
                             <th>#</th>
                             <th>ক্যাটেগরি</th>
-                            <th>প্রোডাক্ট</th>
                             <th>পরিমাণ</th>
                             <th>ক্যারেট</th>
                             <th>ভরি</th>
@@ -45,7 +44,6 @@
                                 <strong>{{ $sl }}</strong>
                             </td>
                             <td>{{ $stock->productCategory->category_name ?? 'N/A' }}</td>
-                            <td>{{ $stock->product->product_name ?? 'N/A' }}</td>
                             <td>{{ $stock->qty }}</td>
                             <td>{{ $stock->karat }}</td>
                             <td>{{ $stock->bhori }}</td>
