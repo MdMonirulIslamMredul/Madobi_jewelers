@@ -191,19 +191,34 @@ Route::prefix('admin')->middleware('auth', 'is_admin')->group(function () {
     Route::get('/warehouse/stocks', [StockController::class, 'warehouse_stock_index'])->name('warehouse.stock');
     Route::get('/hold/stocks', [StockController::class, 'hold_stock_index'])->name('hold.stock');
     Route::post('/stock/delete', [StockController::class, 'stock_delete'])->name('stock.delete');
+    Route::post('/stock/send-to-shop', [StockController::class, 'send_to_shop'])->name('stock.send-to-shop');
+    Route::post('/stock/send-to-warehouse', [StockController::class, 'send_to_warehouse'])->name('stock.send-to-warehouse');
+    Route::post('/stock/send-to-hold', [StockController::class, 'send_to_hold'])->name('stock.send-to-hold');
+    Route::post('/stock/send-to-karigor', [StockController::class, 'send_to_karigor'])->name('stock.send-to-karigor');
+    Route::get('/shop/stock-list', [StockController::class, 'shop_stock_list'])->name('shop.stock.list');
+    Route::get('/warehouse/stock-list', [StockController::class, 'warehouse_stock_list'])->name('warehouse.stock.list');
+    Route::get('/total/stock-list', [StockController::class, 'total_stock_list'])->name('total.stock.list');
 
 
     // Karigor Product
     Route::get('/karigor/stock', [KarigorController::class, 'karigor_stock'])->name('karigor.stock');
     Route::post('/karigor/stock/store', [KarigorController::class, 'karigor_stock_store'])->name('karigor.stock.store');
     Route::get('/karigor/product', [KarigorController::class, 'karigor_product'])->name('karigor.product');
+
+    // Karigor Job Routes
+    Route::get('/karigor/jobs', [\App\Http\Controllers\Admin\KarigorJobController::class, 'karigor_job_index'])->name('karigor.job');
+    Route::post('/karigor-job/assign', [\App\Http\Controllers\Admin\KarigorJobController::class, 'assignJob'])->name('karigor-job.assign');
+    Route::post('/karigor-job/complete', [\App\Http\Controllers\Admin\KarigorJobController::class, 'completeJob'])->name('karigor-job.complete');
     Route::post('/karigor/product/store', [KarigorController::class, 'karigor_product_store'])->name('karigor.product.store');
     Route::post('/karigor/product/status/update', [KarigorController::class, 'karigor_product_status_update'])->name('karigor.product.status.update');
     Route::get('/karigor/product/{id}', [KarigorController::class, 'karigor_product_edit'])->name('karigor.product.edit');
     Route::post('/karigor/product/update', [KarigorController::class, 'karigor_product_update'])->name('karigor.product.update');
     Route::get('/karigor', [KarigorController::class, 'karigor_index'])->name('karigor.index');
+    Route::get('/karigor/create', [KarigorController::class, 'karigor_create'])->name('karigor.create');
+    Route::post('/karigor/store', [KarigorController::class, 'karigor_store'])->name('karigor.store');
     Route::get('/karigor/{id}', [KarigorController::class, 'karigor_edit'])->name('karigor.edit');
     Route::post('/karigor/update', [KarigorController::class, 'karigor_update'])->name('karigor.update');
+    Route::post('/karigor/delete', [KarigorController::class, 'karigor_delete'])->name('karigor.delete');
 
 
 
