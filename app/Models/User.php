@@ -20,7 +20,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'role_id', 'department_id', 'name', 'last_name', 'phone', 'phone2', 'email', 'password', 'is_active'
+        'role_id', 'department_id', 'name', 'last_name', 'phone', 'phone2', 'email', 'address', 'extra_info', 'password', 'is_active'
     ];
 
     /**
@@ -141,4 +141,13 @@ class User extends Authenticatable
         return $this->hasMany(Repair::class,'user_id','id');
     }
 
+    public function instantSells()
+    {
+        return $this->hasMany(InstantSell::class, 'customer_id', 'id');
+    }
+
+    public function customOrders()
+    {
+        return $this->hasMany(CustomOrder::class, 'customer_id', 'id');
+    }
 }
