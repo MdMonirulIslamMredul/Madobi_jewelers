@@ -321,6 +321,7 @@
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#assignJobModal"
                                                 data-purchase-id="{{ $purchase->id }}"
+                                                data-category-id="{{ $purchase->category_id }}"
                                                 data-category="{{ $purchase->productCategory->category_name ?? '—' }}"
                                                 data-product="{{ $purchase->product->product_name ?? '—' }}"
                                                 data-karat="{{ $purchase->karat ?? '—' }}"
@@ -923,16 +924,25 @@
                             </div>
                         </div>
 
-                        {{-- 3. Extra Raw Gold Input --}}
-                        <div class="mb-3">
-                            <label for="extra_raw_gold" class="form-label fw-bold">
-                                <i class="fa-solid fa-weight-hanging me-1 text-primary"></i> ৩. Extra Raw Gold (গ্রাম হিসাব) <span class="text-muted fw-normal">(ঐচ্ছিক / Optional)</span>
-                            </label>
-                            <div class="input-group">
-                                <input type="number" step="0.001" min="0" name="extra_raw_gold" id="extra_raw_gold" class="form-control" placeholder="অতিরিক্ত র গোল্ডের পরিমাণ লিখুন (গ্রামে)...">
-                                <span class="input-group-text bg-light">গ্রাম (GM)</span>
+                        {{-- 3. Extra Raw Gold / Material Allocation & Deduction --}}
+                        <div class="mb-3 p-3 rounded-3" style="background:#fffbeb;border:1px solid #fef3c7;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="extra_raw_gold" class="form-label fw-bold mb-0 text-dark">
+                                    <i class="fa-solid fa-coins me-1 text-warning"></i> ৩. কারিগরকে কাঁচামাল/র গোল্ড প্রদান (Extra Raw Material)
+                                </label>
+                                <span class="badge bg-warning text-dark border" id="assign-raw-stock-badge">মজুদ চেক হচ্ছে...</span>
                             </div>
-                            <div class="form-text text-muted">প্রয়োজন না থাকলে খালি রাখুন।</div>
+                            <div class="input-group">
+                                <input type="number" step="0.001" min="0" name="extra_raw_gold" id="extra_raw_gold" class="form-control fw-bold" placeholder="কাঁচামালের পরিমাণ লিখুন (গ্রামে)...">
+                                <span class="input-group-text bg-light fw-bold">গ্রাম (GM)</span>
+                            </div>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="is_raw_material_given" id="is_raw_material_given" value="1" checked>
+                                <label class="form-check-label small fw-semibold text-dark" for="is_raw_material_given">
+                                    কাঁচামাল প্রদান করা হলে কাঁচা স্টক (Raw Stock) থেকে স্বয়ংক্রিয়ভাবে বিয়োগ হবে
+                                </label>
+                            </div>
+                            <input type="hidden" name="raw_material_category_id" id="assign_category_id" value="">
                         </div>
 
                     </div>
@@ -957,30 +967,48 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Assign Job Modal Data Binding & Search Filter
+            function populateAssignModal(d) {
+                document.getElementById('assign_purchase_id').value = d.purchaseId || '';
+                document.getElementById('assign-item-id').textContent = '#' + (d.purchaseId || '—');
+                document.getElementById('assign-item-cat-prod').textContent = (d.category || '—') + ' - ' + (d.product || '—');
+                document.getElementById('assign-item-weight').textContent = (d.karat || '—') + ' (' + (d.bhori || 0) + 'ভরি, ' + (d.ana || 0) + 'আনা, ' + (d.roti || 0) + 'রতি, ' + (d.point || 0) + 'পয়েন্ট)';
+                document.getElementById('assign-item-gram').textContent = (d.gram || '0') + ' গ্রাম';
+                document.getElementById('assign-item-raw-gold').textContent = (d.rawGold || '—') + ' গ্রাম';
+                
+                var catId = d.categoryId || '';
+                var catInput = document.getElementById('assign_category_id');
+                if (catInput) catInput.value = catId;
+
+                var stockBadge = document.getElementById('assign-raw-stock-badge');
+                if (stockBadge) {
+                    if (catId) {
+                        stockBadge.textContent = 'মজুদ চেক হচ্ছে...';
+                        fetch('{{ url("/raw-stocks/get-stock") }}/' + catId)
+                            .then(function(res) { return res.json(); })
+                            .then(function(data) {
+                                stockBadge.textContent = 'মজুদ: ' + (data.formatted || (data.available + ' গ্রাম'));
+                            })
+                            .catch(function() {
+                                stockBadge.textContent = 'মজুদ তথ্য পাওয়া যায়নি';
+                            });
+                    } else {
+                        stockBadge.textContent = 'মজুদ অপ্রাপ্য';
+                    }
+                }
+            }
+
             var assignModal = document.getElementById('assignJobModal');
             if (assignModal) {
                 assignModal.addEventListener('show.bs.modal', function (event) {
                     var btn = event.relatedTarget;
                     if (!btn) return;
-                    var d = btn.dataset;
-                    document.getElementById('assign_purchase_id').value = d.purchaseId || '';
-                    document.getElementById('assign-item-id').textContent = '#' + (d.purchaseId || '—');
-                    document.getElementById('assign-item-cat-prod').textContent = (d.category || '—') + ' - ' + (d.product || '—');
-                    document.getElementById('assign-item-weight').textContent = (d.karat || '—') + ' (' + (d.bhori || 0) + 'ভরি, ' + (d.ana || 0) + 'আনা, ' + (d.roti || 0) + 'রতি, ' + (d.point || 0) + 'পয়েন্ট)';
-                    document.getElementById('assign-item-gram').textContent = (d.gram || '0') + ' গ্রাম';
-                    document.getElementById('assign-item-raw-gold').textContent = (d.rawGold || '—') + ' গ্রাম';
+                    populateAssignModal(btn.dataset);
                 });
             }
 
             document.querySelectorAll('.assign-job-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
-                    var d = this.dataset;
-                    document.getElementById('assign_purchase_id').value = d.purchaseId || '';
-                    document.getElementById('assign-item-id').textContent = '#' + (d.purchaseId || '—');
-                    document.getElementById('assign-item-cat-prod').textContent = (d.category || '—') + ' - ' + (d.product || '—');
-                    document.getElementById('assign-item-weight').textContent = (d.karat || '—') + ' (' + (d.bhori || 0) + 'ভরি, ' + (d.ana || 0) + 'আনা, ' + (d.roti || 0) + 'রতি, ' + (d.point || 0) + 'পয়েন্ট)';
-                    document.getElementById('assign-item-gram').textContent = (d.gram || '0') + ' গ্রাম';
-                    document.getElementById('assign-item-raw-gold').textContent = (d.rawGold || '—') + ' গ্রাম';
+                    populateAssignModal(this.dataset);
                 });
             });
 

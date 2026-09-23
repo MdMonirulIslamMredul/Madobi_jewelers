@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\KarigorJob;
 use App\Models\Purchase;
 use App\Models\PurchaseLocationHistory;
+use App\Models\RawStock;
+use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 
 class KarigorJobController extends Controller
@@ -16,10 +18,13 @@ class KarigorJobController extends Controller
     public function assignJob(Request $request)
     {
         $request->validate([
-            'purchase_id' => 'required|exists:purchases,id',
-            'karigor_id'  => 'required|exists:users,id',
-            'task_type'   => 'required|in:Repair,Raw Gold(Paka kora)',
-            'extra_raw_gold' => 'nullable|numeric|min:0',
+            'purchase_id'             => 'required|exists:purchases,id',
+            'karigor_id'              => 'required|exists:users,id',
+            'task_type'               => 'required|in:Repair,Raw Gold(Paka kora)',
+            'extra_raw_gold'          => 'nullable|numeric|min:0',
+            'is_raw_material_given'   => 'nullable',
+            'given_raw_material'      => 'nullable|numeric|min:0',
+            'raw_material_category_id'=> 'nullable|exists:product_categories,id',
         ]);
 
         $purchase = Purchase::findOrFail($request->purchase_id);
@@ -37,19 +42,40 @@ class KarigorJobController extends Controller
             ]);
         }
 
+        // Determine if raw materials are given to karigor
+        $isGiven = $request->boolean('is_raw_material_given') || ($request->filled('extra_raw_gold') && floatval($request->extra_raw_gold) > 0) || ($request->filled('given_raw_material') && floatval($request->given_raw_material) > 0);
+        $rawMaterialAmount = floatval($request->given_raw_material ?? $request->extra_raw_gold ?? 0);
+        $rawMaterialCatId = $request->raw_material_category_id ?? $purchase->category_id ?? 1;
+
         // Create new Karigor Job
         $job = KarigorJob::create([
-            'purchase_id'             => $purchase->id,
-            'karigor_id'              => $request->karigor_id,
-            'assigned_by'             => auth()->id(),
-            'task_type'               => $request->task_type,
-            'status'                  => 'in_progress',
-            'given_gross_weight'      => $purchase->gram ?? 0,
-            'given_purity_weight'     => $purchase->raw_gold ?? 0,
-            'assigned_extra_raw_gold' => $request->extra_raw_gold ?? 0,
-            'assigned_at'             => now(),
-            'notes'                   => $request->notes ?? 'Assigned to Karigor',
+            'purchase_id'              => $purchase->id,
+            'karigor_id'               => $request->karigor_id,
+            'assigned_by'              => auth()->id(),
+            'task_type'                => $request->task_type,
+            'status'                   => 'in_progress',
+            'given_gross_weight'       => $purchase->gram ?? 0,
+            'given_purity_weight'      => $purchase->raw_gold ?? 0,
+            'assigned_extra_raw_gold'  => $rawMaterialAmount,
+            'is_raw_material_given'    => $isGiven && $rawMaterialAmount > 0 ? true : false,
+            'raw_material_category_id' => $rawMaterialCatId,
+            'given_raw_material'       => $isGiven ? $rawMaterialAmount : 0,
+            'assigned_at'              => now(),
+            'notes'                    => $request->notes ?? 'Assigned to Karigor',
         ]);
+
+        // If raw materials are given to karigor, deduct from raw_stocks table
+        if ($isGiven && $rawMaterialAmount > 0) {
+            $karigorUser = $job->karigor;
+            $karigorName = $karigorUser ? ($karigorUser->name . ' ' . ($karigorUser->last_name ?? '')) : "ID #{$job->karigor_id}";
+            RawStock::deductStock($rawMaterialCatId, $rawMaterialAmount, [
+                'karigor_job_id' => $job->id,
+                'purchase_id'    => $purchase->id,
+                'karigor_id'     => $job->karigor_id,
+                'reason'         => "কারিগর {$karigorName} কে জব #{$job->id} ({$job->task_type}) বাবদ কাঁচামাল প্রদান",
+                'created_by'     => auth()->id(),
+            ]);
+        }
 
         // Update purchase location & set active karigor_job_id
         $purchase->location = 'in_progress';
@@ -65,11 +91,11 @@ class KarigorJobController extends Controller
             'transferred_by'      => auth()->id(),
             'assigned_karigor_id' => $request->karigor_id,
             'task_type'           => $request->task_type,
-            'extra_raw_gold'      => $request->extra_raw_gold,
+            'extra_raw_gold'      => $rawMaterialAmount,
             'note'                => 'Sent to Karigor Job (In Progress)',
         ]);
 
-        return redirect()->back()->with('message', 'কারিগরকে কাজ সফলভাবে অর্পণ করা হয়েছে 🔨');
+        return redirect()->back()->with('message', 'কারিগরকে কাজ সফলভাবে অর্পণ করা হয়েছে 🔨' . ($isGiven && $rawMaterialAmount > 0 ? ' এবং কাঁচা স্টক থেকে ' . number_format($rawMaterialAmount, 3) . ' গ্রাম বিয়োগ করা হয়েছে।' : ''));
     }
 
     /**
@@ -113,6 +139,25 @@ class KarigorJobController extends Controller
             'notes'                 => $request->notes,
         ]);
 
+        // When task_type is 'Raw Gold(Paka kora)', founding raw gold is added to raw_stocks
+        $isRawGoldPakaJob = (stripos($job->task_type, 'Raw Gold') !== false || stripos($job->task_type, 'paka kora') !== false);
+        if ($isRawGoldPakaJob && $returnedRawGold > 0) {
+            $goldCat = ProductCategory::where('category_slug', 'gold')->orWhere('category_name', 'Gold')->first();
+            $goldCatId = $goldCat ? $goldCat->id : 1;
+
+            $karigorUser = $job->karigor;
+            $karigorName = $karigorUser ? ($karigorUser->name . ' ' . ($karigorUser->last_name ?? '')) : "ID #{$job->karigor_id}";
+
+            RawStock::addStock($goldCatId, $returnedRawGold, [
+                'karigor_job_id' => $job->id,
+                'purchase_id'    => $purchase ? $purchase->id : null,
+                'karigor_id'     => $job->karigor_id,
+                'reason'         => "পাকা করা (Raw Gold) কাজ সম্পন্ন - কারিগর {$karigorName} থেকে প্রাপ্ত খাঁটি পাকা সোনা (Job #{$job->id})",
+                'created_by'     => auth()->id(),
+                'notes'          => $request->notes,
+            ]);
+        }
+
         // Update purchase location, raw_gold and gram
         $fromLoc = $purchase->location ?: 'in_progress';
         $purchase->location = 'is_karigor';
@@ -134,10 +179,12 @@ class KarigorJobController extends Controller
             'assigned_karigor_id' => $job->karigor_id,
             'task_type'           => $job->task_type,
             'extra_raw_gold'      => $usedExtraGold,
-            'note'                => 'Karigor Job Completed (' . $job->task_type . ' - ' . number_format($conversionPct, 2) . '% conversion)',
+            'note'                => 'Karigor Job Completed (' . $job->task_type . ' - ' . number_format($conversionPct, 2) . '% conversion)' . ($isRawGoldPakaJob && $returnedRawGold > 0 ? ' [Founding Raw Gold: ' . number_format($returnedRawGold, 3) . 'g added to Raw Stock]' : ''),
         ]);
 
-        return redirect()->back()->with('message', 'কারিগরের কাজ সফলভাবে সম্পন্ন ও স্টক আপডেট হয়েছে ✅ (Conversion: ' . number_format($conversionPct, 2) . '%)');
+        $addedStockMsg = ($isRawGoldPakaJob && $returnedRawGold > 0) ? ' এবং ' . number_format($returnedRawGold, 3) . ' গ্রাম পাকা সোনা কাঁচা স্টক এ যুক্ত হয়েছে 🪙' : '';
+
+        return redirect()->back()->with('message', 'কারিগরের কাজ সফলভাবে সম্পন্ন ও স্টক আপডেট হয়েছে ✅' . $addedStockMsg . ' (Conversion: ' . number_format($conversionPct, 2) . '%)');
     }
 
     /**

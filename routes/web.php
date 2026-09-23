@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\RepairController;
 use App\Http\Controllers\Admin\GoldController;
 use App\Http\Controllers\Trash\PermissionTrashController;
 use App\Http\Controllers\Admin\ProductPriceController;
+use App\Http\Controllers\Admin\KarigorMojuriController;
 
 
 
@@ -139,8 +140,15 @@ Route::prefix('admin')->middleware('auth', 'is_admin')->group(function () {
     //product endv
 
     //product price start
+    Route::get('product-prices/history', [ProductPriceController::class, 'history'])->name('product-price.history');
+    Route::get('product-prices/{id}/history-json', [ProductPriceController::class, 'getHistoryJson'])->name('product-price.history-json');
     Route::resource('product-price', ProductPriceController::class);
     //product price end
+
+    //karigor mojuri start
+    Route::resource('karigor-mojuri', KarigorMojuriController::class);
+    Route::resource('karagor-mujuri', KarigorMojuriController::class);
+    //karigor mojuri end
 
     //purchase start
     Route::resource('purchase', PurchaseController::class);
@@ -218,6 +226,17 @@ Route::prefix('admin')->middleware('auth', 'is_admin')->group(function () {
     Route::get('/shop/stock-list', [StockController::class, 'shop_stock_list'])->name('shop.stock.list');
     Route::get('/warehouse/stock-list', [StockController::class, 'warehouse_stock_list'])->name('warehouse.stock.list');
     Route::get('/total/stock-list', [StockController::class, 'total_stock_list'])->name('total.stock.list');
+
+    // Raw Stocks Management & Raw Material Purchases (CRUD)
+    Route::get('/raw-stocks', [\App\Http\Controllers\Admin\RawStockController::class, 'index'])->name('raw-stock.index');
+    Route::post('/raw-stocks/store', [\App\Http\Controllers\Admin\RawStockController::class, 'store'])->name('raw-stock.store');
+    Route::post('/raw-stocks/adjust', [\App\Http\Controllers\Admin\RawStockController::class, 'adjust'])->name('raw-stock.adjust');
+    Route::get('/raw-stocks/get-stock/{categoryId}', [\App\Http\Controllers\Admin\RawStockController::class, 'getStock'])->name('raw-stock.get-stock');
+    Route::post('/raw-stocks/purchases', [\App\Http\Controllers\Admin\RawStockController::class, 'purchaseStore'])->name('raw-stock.purchase.store');
+    Route::get('/raw-stocks/purchases/{id}', [\App\Http\Controllers\Admin\RawStockController::class, 'purchaseShow'])->name('raw-stock.purchase.show');
+    Route::post('/raw-stocks/purchases/{id}/update', [\App\Http\Controllers\Admin\RawStockController::class, 'purchaseUpdate'])->name('raw-stock.purchase.update');
+    Route::delete('/raw-stocks/purchases/{id}', [\App\Http\Controllers\Admin\RawStockController::class, 'purchaseDestroy'])->name('raw-stock.purchase.destroy');
+    Route::get('/raw-stocks/purchases/{id}/invoice', [\App\Http\Controllers\Admin\RawStockController::class, 'purchaseInvoice'])->name('raw-stock.purchase.invoice');
 
 
     // Karigor Product

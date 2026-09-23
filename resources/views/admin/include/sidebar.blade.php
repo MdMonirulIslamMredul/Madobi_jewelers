@@ -42,6 +42,8 @@
                         <li><a href="{{ route('productcategory.index') }}">প্রোডাক্ট ক্যাটাগরি</a></li>
                         <li><a href="{{route('product.index')}}">প্রোডাক্ট সেটিংস</a></li>
                         <li><a href="{{ route('product-price.index') }}">প্রোডাক্ট প্রাইস</a></li>
+                        <li><a href="{{ route('product-price.history') }}">প্রাইস হিস্ট্রি</a></li>
+                        <li><a href="{{ route('karigor-mojuri.index') }}">কারিগর মজুরি</a></li>
                     </ul>
 
                 </li>
@@ -75,7 +77,8 @@
                         <li><a href="{{ route('warehouse.stock.list') }}">গুদাম স্টক তালিকা (পণ্য)</a></li>
                         {{-- <li><a href="{{ route('karigor.stock') }}">কারিগর স্টক তালিকা (পণ্য)</a></li> --}}
                         <li><a href="{{ route('total.stock.list') }}">টোটাল স্টক তালিকা (পণ্য)</a></li>
-                        <li><a href="{{ route('stock.index') }}">টোটাল স্টক (ওজন) </a></li>
+                        {{-- <li><a href="{{ route('stock.index') }}">টোটাল স্টক (ওজন) </a></li> --}}
+                        <li><a href="{{ route('raw-stock.index') }}"><i class="fa-solid fa-coins me-1 text-warning"></i>র ম্যাটেরিয়াল স্টক (কাঁচা সোনা/রূপা)</a></li>
                         {{-- <li><a href="{{ route('shop.stock') }}">দোকান স্টক তালিকা(ওজন) </a></li>
                         <li><a href="{{ route('warehouse.stock') }}">গুদাম স্টক তালিকা(ওজন)</a></li> --}}
 
