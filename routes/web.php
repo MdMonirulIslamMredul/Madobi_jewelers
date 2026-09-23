@@ -180,6 +180,26 @@ Route::prefix('admin')->middleware('auth', 'is_admin')->group(function () {
     Route::post('/sells/update', [SellController::class, 'sell_update'])->name('sells.update');
     Route::get('/sells/edit/{id}', [SellController::class, 'sells_edit'])->name('sells.edit');
 
+    // Customer AJAX & Quick Add
+    Route::get('/customers/search', [\App\Http\Controllers\Admin\CustomerController::class, 'search'])->name('customers.search');
+    Route::post('/customers/quick-store', [\App\Http\Controllers\Admin\CustomerController::class, 'quick_store'])->name('customers.quick_store');
+    Route::post('/customers/walkin', [\App\Http\Controllers\Admin\CustomerController::class, 'walkin_customer'])->name('customers.walkin');
+
+    // System 1: Instant Shop Sales
+    Route::resource('instant-sells', \App\Http\Controllers\Admin\InstantSellController::class)->only(['index', 'create', 'store', 'show']);
+    Route::get('/shop-products/{id}/history', [\App\Http\Controllers\Admin\InstantSellController::class, 'productHistory'])->name('shop-products.history');
+
+    // System 2: Custom Jewelry Orders
+    Route::resource('custom-orders', \App\Http\Controllers\Admin\CustomOrderController::class)->only(['index', 'create', 'store', 'show']);
+    Route::get('/custom-orders/{id}/invoice', [\App\Http\Controllers\Admin\CustomOrderController::class, 'customerInvoice'])->name('custom-orders.invoice');
+    Route::get('/custom-orders/{id}/karigor-invoice/{karigor_id?}', [\App\Http\Controllers\Admin\CustomOrderController::class, 'karigorInvoice'])->name('custom-orders.karigor-invoice');
+    Route::post('/custom-orders/{id}/receive', [\App\Http\Controllers\Admin\CustomOrderController::class, 'receiveFromKarigor'])->name('custom-orders.receive');
+    Route::post('/custom-orders/{id}/deliver', [\App\Http\Controllers\Admin\CustomOrderController::class, 'deliverAndBill'])->name('custom-orders.deliver');
+
+    // Unified Partial Payments
+    Route::get('/sell-payments/history', [\App\Http\Controllers\Admin\SellPaymentController::class, 'history'])->name('sell-payments.history');
+    Route::post('/sell-payments/collect', [\App\Http\Controllers\Admin\SellPaymentController::class, 'collectPayment'])->name('sell-payments.collect');
+
 
     // Stock
     Route::get('/stocks/create', [StockController::class, 'stock_create'])->name('stock.create');

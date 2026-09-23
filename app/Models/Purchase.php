@@ -58,4 +58,9 @@ class Purchase extends Model
     {
         return $this->belongsTo(KarigorJob::class, 'karigor_job_id');
     }
+
+    public function instantSellItem()
+    {
+        return $this->hasOne(InstantSellItem::class, 'purchase_id');
+    }
 }

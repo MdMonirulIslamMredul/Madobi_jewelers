@@ -414,7 +414,17 @@ class PurchaseController extends Controller
      */
     public function show($id)
     {
-        $transaction = Transaction::with(['purchases.product', 'purchases.productCategory', 'purchases.locationHistories.transferredBy', 'purchases.locationHistories.karigor', 'user'])->findOrFail($id);
+        $transaction = Transaction::with(['purchases.product', 'purchases.productCategory', 'purchases.locationHistories.transferredBy', 'purchases.locationHistories.karigor', 'user'])->find($id);
+
+        if (!$transaction) {
+            $purchase = Purchase::find($id);
+            if ($purchase && $purchase->transaction_id) {
+                $transaction = Transaction::with(['purchases.product', 'purchases.productCategory', 'purchases.locationHistories.transferredBy', 'purchases.locationHistories.karigor', 'user'])->findOrFail($purchase->transaction_id);
+            } else {
+                abort(404, 'Transaction or purchase not found.');
+            }
+        }
+
         return view('admin.purchase.show', compact('transaction'));
     }
 

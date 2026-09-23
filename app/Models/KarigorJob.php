@@ -11,6 +11,7 @@ class KarigorJob extends Model
 
     protected $fillable = [
         'purchase_id',
+        'custom_order_id',
         'karigor_id',
         'assigned_by',
         'task_type',
@@ -23,19 +24,28 @@ class KarigorJob extends Model
         'used_extra_raw_gold',
         'wastage_gold',
         'conversion_percentage',
+        'is_raw_material_given',
+        'raw_material_category_id',
+        'given_raw_material',
         'assigned_at',
         'completed_at',
         'notes',
     ];
 
     protected $casts = [
-        'assigned_at' => 'datetime',
-        'completed_at' => 'datetime',
+        'assigned_at'           => 'datetime',
+        'completed_at'          => 'datetime',
+        'is_raw_material_given' => 'boolean',
     ];
 
     public function purchase()
     {
         return $this->belongsTo(Purchase::class, 'purchase_id');
+    }
+
+    public function customOrder()
+    {
+        return $this->belongsTo(CustomOrder::class, 'custom_order_id');
     }
 
     public function karigor()
@@ -46,5 +56,15 @@ class KarigorJob extends Model
     public function assignedBy()
     {
         return $this->belongsTo(User::class, 'assigned_by');
+    }
+
+    public function rawMaterialCategory()
+    {
+        return $this->belongsTo(ProductCategory::class, 'raw_material_category_id');
+    }
+
+    public function rawStockHistories()
+    {
+        return $this->hasMany(RawStockHistory::class, 'karigor_job_id');
     }
 }
